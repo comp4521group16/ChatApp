@@ -171,7 +171,6 @@ public class ChatFragment extends Fragment {
 //            e.printStackTrace();
 //        }
         socket.emit("message", message);
-
     }
 
     private void addMessage(String message) {
