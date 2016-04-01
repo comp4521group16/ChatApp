@@ -1,9 +1,11 @@
 package com.example.kalongip.chatapp;
 
+import android.graphics.Bitmap;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.List;
@@ -31,6 +33,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     public void onBindViewHolder(ViewHolder holder, int position) {
         Message message = mMessages.get(position);
         holder.setMessage(message.getMessage());
+        holder.setImage(message.getImage());
     }
 
     @Override
@@ -40,16 +43,23 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
     public class ViewHolder extends RecyclerView.ViewHolder{
 
-//        private ImageView mImageView;
+        private ImageView mImageView;
         private TextView mMessageView;
         public ViewHolder(View itemView) {
             super(itemView);
-//            mImageView = (ImageView) itemView.findViewById(R.id.image);
+            mImageView = (ImageView) itemView.findViewById(R.id.image);
             mMessageView = (TextView) itemView.findViewById(R.id.message);
         }
 
-        public void setMessage(String message){
+        public void setMessage(String message) {
+            if (null == mMessageView) return;
+            if(null == message) return;
             mMessageView.setText(message);
+        }
+        public void setImage(Bitmap bmp){
+            if(null == mImageView) return;
+            if(null == bmp) return;
+            mImageView.setImageBitmap(bmp);
         }
     }
 }
