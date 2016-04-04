@@ -52,28 +52,11 @@ public class ChatFragment extends Fragment {
 
     private Socket socket;
 
-    private Emitter.Listener handleIncomingMessages = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    JSONObject data = (JSONObject) args[0];
-                    String message;
-                    try{
-                        message = data.getString("message").toString();
-                        addMessage(message);
-                    } catch (JSONException e) {
-                        return;
-                    }
-                }
-            });
-        }
-    };
-
     {
         try{
-            socket = IO.socket("http://10.89.166.43:3000");
+//            socket = IO.socket("http://192.168.1.7:3000");
+//            socket = IO.socket("http://127.8.201.129:8080");
+            socket = IO.socket("http://comp4521-textor.rhcloud.com:8000");
         }catch (URISyntaxException e){
             throw new RuntimeException(e);
         }
@@ -113,6 +96,25 @@ public class ChatFragment extends Fragment {
         socket.connect();
         socket.on("message", handleIncomingMessages);
     }
+
+    private Emitter.Listener handleIncomingMessages = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    JSONObject data = (JSONObject) args[0];
+                    String message;
+                    try{
+                        message = data.getString("message").toString();
+                        addMessage(message);
+                    } catch (JSONException e) {
+                        return;
+                    }
+                }
+            });
+        }
+    };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -162,7 +164,7 @@ public class ChatFragment extends Fragment {
     private void sendMessage() {
         String message = mInputMessageView.getText().toString().trim();
         mInputMessageView.setText("");
-        addMessage(message);
+//        addMessage(message);
 //        JSONObject sendText = new JSONObject();
 //        try{
 //            sendText.put("text", message);
