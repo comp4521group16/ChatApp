@@ -1,11 +1,15 @@
 package com.example.kalongip.chatapp;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
+import com.example.kalongip.chatapp.Callbacks.ImageEncodeCallback;
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
@@ -20,6 +25,10 @@ import com.github.nkzawa.socketio.client.Socket;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,20 +52,50 @@ public class ChatFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
+    private String encodedImage = null;
+
     private EditText mInputMessageView;
     private RecyclerView mMessagesView;
     private RecyclerView.Adapter mAdapter;
+    private static final String TAG = "ChatFragment";
     private List<Message> mMessages = new ArrayList<>();
 
     private OnFragmentInteractionListener mListener;
 
     private Socket socket;
 
+    private Emitter.Listener handleIncomingMessages = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    JSONObject data = (JSONObject) args[0];
+                    String message;
+                    String imageText;
+
+                    try{
+                        Log.i(TAG, "Parse Text");
+                        message = data.getString("message").toString();
+                        addMessage(message);
+                    } catch (JSONException e) {
+                      //  return;
+                    }
+                    try {
+                        Log.i(TAG, "Parse Image");
+                        imageText = data.getString("image");
+                        addImage(decodeImage(imageText));
+                    } catch (JSONException e) {
+                        //return;
+                    }
+                }
+            });
+        }
+    };
+
     {
         try{
-//            socket = IO.socket("http://192.168.1.7:3000");
-//            socket = IO.socket("http://127.8.201.129:8080");
-            socket = IO.socket("http://comp4521-textor.rhcloud.com:8000");
+            socket = IO.socket("http://192.168.1.60:3000");
         }catch (URISyntaxException e){
             throw new RuntimeException(e);
         }
@@ -96,25 +135,6 @@ public class ChatFragment extends Fragment {
         socket.connect();
         socket.on("message", handleIncomingMessages);
     }
-
-    private Emitter.Listener handleIncomingMessages = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    JSONObject data = (JSONObject) args[0];
-                    String message;
-                    try{
-                        message = data.getString("message").toString();
-                        addMessage(message);
-                    } catch (JSONException e) {
-                        return;
-                    }
-                }
-            });
-        }
-    };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -164,7 +184,7 @@ public class ChatFragment extends Fragment {
     private void sendMessage() {
         String message = mInputMessageView.getText().toString().trim();
         mInputMessageView.setText("");
-//        addMessage(message);
+        addMessage(message);
 //        JSONObject sendText = new JSONObject();
 //        try{
 //            sendText.put("text", message);
@@ -173,16 +193,57 @@ public class ChatFragment extends Fragment {
 //            e.printStackTrace();
 //        }
         socket.emit("message", message);
+
     }
 
     private void addMessage(String message) {
         mMessages.add(new Message.Builder(Message.TYPE_MESSAGE).message(message).build());
-        Log.d("qqq", message);
+        Log.d(TAG, message);
         mAdapter = new MessageAdapter(mMessages);
         mAdapter.notifyItemInserted(0);
         scrollToBottom();
     }
 
+    public void sendImage(Bitmap bitmap)
+    {
+        Log.i(TAG, "sendImage");
+        JSONObject sendData = new JSONObject();
+        try{
+            sendData.put("image", encodeImage(bitmap));
+  //          Bitmap bmp = decodeImage(sendData.getString("image"));
+            addImage(bitmap);
+            socket.emit("message",sendData);
+        }catch(JSONException e){
+
+        }
+    }
+
+    private void addImage(Bitmap bmp){
+        mMessages.add(new Message.Builder(Message.TYPE_MESSAGE)
+                .image(bmp).build());
+        mAdapter = new MessageAdapter( mMessages);
+        mAdapter.notifyItemInserted(0);
+        scrollToBottom();
+    }
+
+    private String encodeImage(Bitmap bitmap){
+        encodeImageInBackground encode = new encodeImageInBackground(bitmap, new ImageEncodeCallback() {
+            @Override
+            public void onEncodeCompleted(String image) {
+                encodedImage = image;
+                Log.i(TAG, "Encoded Image: "+encodedImage);
+            }
+        });
+        encode.execute();
+        return encodedImage;
+    }
+
+    private Bitmap decodeImage(String data)
+    {
+        byte[] b = Base64.decode(data,Base64.DEFAULT);
+        Bitmap bmp = BitmapFactory.decodeByteArray(b,0,b.length);
+        return bmp;
+    }
     private void scrollToBottom() {
         mMessagesView.scrollToPosition(mAdapter.getItemCount() - 1);
     }
@@ -212,5 +273,30 @@ public class ChatFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         socket.disconnect();
+    }
+
+    private class encodeImageInBackground extends AsyncTask <Void, Void, String>{
+        Bitmap bitmap;
+        ImageEncodeCallback imageEncodeCallback;
+
+        public encodeImageInBackground(Bitmap bitmap, ImageEncodeCallback imageEncodeCallback) {
+            this.bitmap = bitmap;
+            this.imageEncodeCallback = imageEncodeCallback;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            imageEncodeCallback.onEncodeCompleted(s);
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 50, byteArrayOutputStream);
+            byte[] array = byteArrayOutputStream.toByteArray();
+            String encodeImage = Base64.encodeToString(array, Base64.DEFAULT);
+            return encodeImage;
+        }
     }
 }
