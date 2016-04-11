@@ -10,6 +10,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.pushbots.push.Pushbots;
+
 public class SocketActivity extends AppCompatActivity {
 
     private static final int RESULT_LOAD_IMAGE = 1;
@@ -19,6 +21,7 @@ public class SocketActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_socket);
+        Pushbots.sharedInstance().init(this);
     }
 
     @Override
