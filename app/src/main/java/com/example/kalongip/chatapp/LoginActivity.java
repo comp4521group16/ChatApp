@@ -28,6 +28,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.example.kalongip.chatapp.Model.User;
+import com.example.kalongip.chatapp.Value.Cache;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,6 +63,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+    private Cache cache;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,6 +93,15 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         });
 
+        Button mRegisterButton = (Button) findViewById(R.id.register_button);
+        mRegisterButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), RegisterActivity.class);
+                finish();
+                startActivity(intent);
+            }
+        });
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
     }
@@ -191,7 +204,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     private boolean isEmailValid(String email) {
         //TODO: Replace this with your own logic
-        return email.contains("@");
+        return email != null;
     }
 
     private boolean isPasswordValid(String password) {
@@ -332,6 +345,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             showProgress(false);
 
             if (success) {
+                cache = new Cache(getApplicationContext());
+                User user = new User(mEmail);
+                cache.setUser(user);
                 Intent intent = new Intent(getApplicationContext(), SocketActivity.class);
                 finish();
                 startActivity(intent);

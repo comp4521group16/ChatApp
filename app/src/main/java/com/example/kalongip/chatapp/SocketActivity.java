@@ -42,6 +42,13 @@ public class SocketActivity extends AppCompatActivity {
         }else if (id == R.id.action_gallery){
             // open the gallery to choose photo
             openGallery();
+        }else if (id == R.id.action_logout){
+            // logout
+            Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+//            Cache cache = new Cache(getApplicationContext());
+//            cache.setUser(null);
+            finish();
+            startActivity(intent);
         }
         return super.onOptionsItemSelected(item);
     }
