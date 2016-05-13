@@ -149,7 +149,7 @@ public class ChatFragment extends Fragment {
     private void joinSocket() {
         JSONObject username = new JSONObject();
         try {
-            username.put("username", "ron");
+            username.put("username", "tim");
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -164,7 +164,7 @@ public class ChatFragment extends Fragment {
         Log.i(TAG, "offlineSocket");
         JSONObject username = new JSONObject();
         try {
-            username.put("username", "ron");
+            username.put("username", "tim");
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -221,7 +221,7 @@ public class ChatFragment extends Fragment {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        socket.emit("message", message);
+     //   socket.emit("message", message);
 
     }
 
@@ -254,6 +254,7 @@ public class ChatFragment extends Fragment {
                 Log.i(TAG, "Encoded Image: " + encodedImage);
                 JSONObject sendData = new JSONObject();
                 try {
+                    sendData.put("receiver", "tim");
                     sendData.put("image", encodedImage);
                     socket.emit("message", sendData);
                 } catch (JSONException e) {

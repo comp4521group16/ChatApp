@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.example.kalongip.chatapp.Handler.customHandler;
 import com.pushbots.push.Pushbots;
 
 public class SocketActivity extends AppCompatActivity {
@@ -21,7 +22,9 @@ public class SocketActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_socket);
+        // Pushbots setting
         Pushbots.sharedInstance().init(this);
+        Pushbots.sharedInstance().setCustomHandler(customHandler.class);
     }
 
     @Override
