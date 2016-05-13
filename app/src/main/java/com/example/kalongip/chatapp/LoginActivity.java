@@ -68,6 +68,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        cache = new Cache(getApplicationContext());
+        if (cache.getLoggedIn() == true){
+            Intent intent = new Intent(getApplicationContext(), SocketActivity.class);
+            startActivity(intent);
+            finish();
+        }
         setContentView(R.layout.activity_login);
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
@@ -210,6 +216,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     cache = new Cache(getApplicationContext());
                     User user = new User(email, authData.getUid());
                     cache.setUser(user);
+                    cache.setLoggedIn(true);
+
                     Pushbots.sharedInstance().setAlias(email);
                     Intent intent = new Intent(getApplicationContext(), SocketActivity.class);
                     finish();

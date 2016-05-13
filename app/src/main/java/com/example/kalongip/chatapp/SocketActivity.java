@@ -10,8 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.example.kalongip.chatapp.Handler.customHandler;
-import com.pushbots.push.Pushbots;
+import com.example.kalongip.chatapp.Value.Cache;
 
 public class SocketActivity extends AppCompatActivity {
 
@@ -46,8 +45,9 @@ public class SocketActivity extends AppCompatActivity {
         }else if (id == R.id.action_logout){
             // logout
             Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-//            Cache cache = new Cache(getApplicationContext());
-//            cache.setUser(null);
+            Cache cache = new Cache(getApplicationContext());
+            cache.setLoggedIn(false);
+            cache.clearUser();
             finish();
             startActivity(intent);
         }

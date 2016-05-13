@@ -30,4 +30,22 @@ public class Cache {
         User result = new User(username, uid);
         return result;
     }
+
+    public void setLoggedIn(boolean loggedIn){
+        SharedPreferences prefs = context.getSharedPreferences("SHARE_PREFERENCES", Context.MODE_PRIVATE);
+        prefs.edit().putBoolean("loggedIn", loggedIn).apply();
+    }
+
+    public Boolean getLoggedIn() {
+        boolean loggedIn;
+        SharedPreferences prefs = context.getSharedPreferences("SHARE_PREFERENCES", Context.MODE_PRIVATE);
+        loggedIn = prefs.getBoolean("loggedIn", false);
+        return loggedIn;
+    }
+
+    public void clearUser(){
+        SharedPreferences prefs = context.getSharedPreferences("SHARE_PREFERENCES", Context.MODE_PRIVATE);
+        prefs.edit().clear();
+        prefs.edit().apply();
+    }
 }
