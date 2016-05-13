@@ -224,7 +224,7 @@ public class ChatFragment extends Fragment {
         JSONObject sendText = new JSONObject();
         try{
             sendText.put("text", message);
-            sendText.put("receiver", "tim");
+            sendText.put("receiver", "abc@gmail.com");
             socket.emit("message", sendText);
         } catch (JSONException e) {
             e.printStackTrace();

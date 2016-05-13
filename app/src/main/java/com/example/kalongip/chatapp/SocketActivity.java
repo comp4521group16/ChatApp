@@ -22,9 +22,7 @@ public class SocketActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_socket);
-        // Pushbots setting
-        Pushbots.sharedInstance().init(this);
-        Pushbots.sharedInstance().setCustomHandler(customHandler.class);
+
     }
 
     @Override

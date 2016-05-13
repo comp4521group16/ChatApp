@@ -28,12 +28,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.example.kalongip.chatapp.Handler.customHandler;
 import com.example.kalongip.chatapp.Model.User;
 import com.example.kalongip.chatapp.Value.Cache;
 import com.example.kalongip.chatapp.Value.Const;
 import com.firebase.client.AuthData;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.pushbots.push.Pushbots;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -104,6 +106,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mProgressView = findViewById(R.id.login_progress);
 
         Firebase.setAndroidContext(this);
+
+        // Pushbots setting
+        Pushbots.sharedInstance().init(this);
+        Pushbots.sharedInstance().setCustomHandler(customHandler.class);
     }
 
     private void populateAutoComplete() {
@@ -205,7 +211,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     cache = new Cache(getApplicationContext());
                     User user = new User(email, authData.getUid());
                     cache.setUser(user);
-
+                    Pushbots.sharedInstance().setAlias(email);
                     Intent intent = new Intent(getApplicationContext(), SocketActivity.class);
                     finish();
                     startActivity(intent);
