@@ -18,8 +18,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 
 import com.example.kalongip.chatapp.Callbacks.ImageEncodeCallback;
-import com.example.kalongip.chatapp.Model.User;
-import com.example.kalongip.chatapp.Value.Cache;
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
@@ -28,6 +26,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
@@ -63,9 +64,6 @@ public class ChatFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
 
     private Socket socket;
-    private Cache cache;
-    private User user;
-    private String username;
 
     private Emitter.Listener handleIncomingMessages = new Emitter.Listener() {
         @Override
@@ -98,7 +96,7 @@ public class ChatFragment extends Fragment {
 
     {
         try {
-            socket = IO.socket("http://10.89.166.43:3000");
+            socket = IO.socket("http://192.168.1.60:3000");
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
@@ -136,9 +134,6 @@ public class ChatFragment extends Fragment {
         }
         socket.connect();
         socket.on("message", handleIncomingMessages);
-        cache = new Cache(getContext());
-        user = cache.getUser();
-        username = user.getUsername();
     }
 
     @Override
@@ -152,12 +147,12 @@ public class ChatFragment extends Fragment {
      * Called in onResume();
      */
     private void joinSocket() {
-//        JSONObject username = new JSONObject();
-//        try {
-//            username.put("username", "tim");
-//        } catch (JSONException e) {
-//            e.printStackTrace();
-//        }
+        JSONObject username = new JSONObject();
+        try {
+            username.put("username", "tim");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         socket.emit(JOIN, username);
     }
 
@@ -167,12 +162,12 @@ public class ChatFragment extends Fragment {
      */
     private void offlineSocket() {
         Log.i(TAG, "offlineSocket");
-//        JSONObject username = new JSONObject();
-//        try {
-//            username.put("username", "tim");
-//        } catch (JSONException e) {
-//            e.printStackTrace();
-//        }
+        JSONObject username = new JSONObject();
+        try {
+            username.put("username", "tim");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         socket.emit(OFFLINE, username);
     }
 
@@ -221,12 +216,12 @@ public class ChatFragment extends Fragment {
         JSONObject sendText = new JSONObject();
         try{
             sendText.put("text", message);
-            sendText.put("receiver", "ron");
+            sendText.put("receiver", "tim");
             socket.emit("message", sendText);
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        socket.emit("message", message);
+     //   socket.emit("message", message);
 
     }
 
@@ -259,6 +254,7 @@ public class ChatFragment extends Fragment {
                 Log.i(TAG, "Encoded Image: " + encodedImage);
                 JSONObject sendData = new JSONObject();
                 try {
+                    sendData.put("receiver", "tim");
                     sendData.put("image", encodedImage);
                     socket.emit("message", sendData);
                 } catch (JSONException e) {
