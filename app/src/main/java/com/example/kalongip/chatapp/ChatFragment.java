@@ -18,6 +18,8 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 
 import com.example.kalongip.chatapp.Callbacks.ImageEncodeCallback;
+import com.example.kalongip.chatapp.Model.User;
+import com.example.kalongip.chatapp.Value.Cache;
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
@@ -64,6 +66,9 @@ public class ChatFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
 
     private Socket socket;
+    private Cache cache;
+    private User user;
+    private String username;
 
     private Emitter.Listener handleIncomingMessages = new Emitter.Listener() {
         @Override
@@ -134,6 +139,9 @@ public class ChatFragment extends Fragment {
         }
         socket.connect();
         socket.on("message", handleIncomingMessages);
+        cache = new Cache(getContext());
+        user = cache.getUser();
+        username = user.getUsername();
     }
 
     @Override
@@ -221,7 +229,7 @@ public class ChatFragment extends Fragment {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-     //   socket.emit("message", message);
+        socket.emit("message", message);
 
     }
 

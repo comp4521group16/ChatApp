@@ -28,4 +28,8 @@ dependencies {
     compile 'io.realm:realm-android:0.87.3'
     compile 'com.github.nkzawa:socket.io-client:0.3.0'
     compile 'com.pushbots:pushbots-lib:2.0.13@aar'
+    compile 'com.firebase:firebase-client-android:2.5.2+'
+    compile('com.github.afollestad.material-dialogs:commons:0.8.5.8@aar') {
+        transitive = true
+    }
 }
