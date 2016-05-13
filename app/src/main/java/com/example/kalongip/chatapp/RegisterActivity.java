@@ -1,7 +1,6 @@
 package com.example.kalongip.chatapp;
 
 import android.app.ProgressDialog;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -28,9 +27,7 @@ public class RegisterActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
         finish();
-        startActivity(intent);
     }
 
     @Override
@@ -88,7 +85,7 @@ public class RegisterActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(Map<String, Object> result) {
                     Log.d(TAG, "Successfully created user account with uid: " + result.get("uid"));
-                    onBackPressed();
+                    finish();
                 }
                 @Override
                 public void onError(FirebaseError firebaseError) {

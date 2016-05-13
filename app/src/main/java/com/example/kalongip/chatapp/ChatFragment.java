@@ -28,9 +28,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,7 +65,6 @@ public class ChatFragment extends Fragment {
     private Socket socket;
     private Cache cache;
     private User user;
-    private String username;
 
     private Emitter.Listener handleIncomingMessages = new Emitter.Listener() {
         @Override
@@ -101,7 +97,7 @@ public class ChatFragment extends Fragment {
 
     {
         try {
-            socket = IO.socket("http://192.168.1.60:3000");
+            socket = IO.socket("http://192.168.20.168:3000");
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
@@ -141,7 +137,6 @@ public class ChatFragment extends Fragment {
         socket.on("message", handleIncomingMessages);
         cache = new Cache(getContext());
         user = cache.getUser();
-        username = user.getUsername();
     }
 
     @Override
@@ -157,7 +152,7 @@ public class ChatFragment extends Fragment {
     private void joinSocket() {
         JSONObject username = new JSONObject();
         try {
-            username.put("username", "tim");
+            username.put("username", user.getUsername());
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -172,7 +167,7 @@ public class ChatFragment extends Fragment {
         Log.i(TAG, "offlineSocket");
         JSONObject username = new JSONObject();
         try {
-            username.put("username", "tim");
+            username.put("username", user.getUsername());
         } catch (JSONException e) {
             e.printStackTrace();
         }
