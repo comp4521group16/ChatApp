@@ -26,9 +26,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,8 +44,7 @@ public class ChatFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-    private static final String JOIN = "join";
-    private static final String OFFLINE = "offline";
+
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
@@ -75,12 +71,12 @@ public class ChatFragment extends Fragment {
                     String message;
                     String imageText;
 
-                    try {
+                    try{
                         Log.i(TAG, "Parse Text");
                         message = data.getString("message").toString();
                         addMessage(message);
                     } catch (JSONException e) {
-                        //  return;
+                      //  return;
                     }
                     try {
                         Log.i(TAG, "Parse Image");
@@ -95,9 +91,9 @@ public class ChatFragment extends Fragment {
     };
 
     {
-        try {
-            socket = IO.socket("http://192.168.1.60:3000");
-        } catch (URISyntaxException e) {
+        try{
+            socket = IO.socket("http://comp4521-textor.rhcloud.com:8000");
+        }catch (URISyntaxException e){
             throw new RuntimeException(e);
         }
     }
@@ -132,43 +128,9 @@ public class ChatFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
         socket.connect();
         socket.on("message", handleIncomingMessages);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        joinSocket();
-    }
-
-    /**
-     * This method Send the username obtained from shared preference to the socket to indicate online status
-     * Called in onResume();
-     */
-    private void joinSocket() {
-        JSONObject username = new JSONObject();
-        try {
-            username.put("username", "tim");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        socket.emit(JOIN, username);
-    }
-
-    /**
-     * This method Delete the username from the socket record to indicate offline status.
-     * Called in onStop().
-     */
-    private void offlineSocket() {
-        Log.i(TAG, "offlineSocket");
-        JSONObject username = new JSONObject();
-        try {
-            username.put("username", "tim");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        socket.emit(OFFLINE, username);
     }
 
     @Override
@@ -178,10 +140,17 @@ public class ChatFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_chat, container, false);
     }
 
+    // TODO: Rename method, update argument and hook method into UI event
+    public void onButtonPressed(Uri uri) {
+        if (mListener != null) {
+            mListener.onFragmentInteraction(uri);
+        }
+    }
+
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        mAdapter = new MessageAdapter(mMessages);
+        mAdapter = new MessageAdapter (mMessages);
 //        if (context instanceof OnFragmentInteractionListener) {
 //            mListener = (OnFragmentInteractionListener) context;
 //        } else {
@@ -213,15 +182,14 @@ public class ChatFragment extends Fragment {
         String message = mInputMessageView.getText().toString().trim();
         mInputMessageView.setText("");
         addMessage(message);
-        JSONObject sendText = new JSONObject();
-        try{
-            sendText.put("text", message);
-            sendText.put("receiver", "tim");
-            socket.emit("message", sendText);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-     //   socket.emit("message", message);
+//        JSONObject sendText = new JSONObject();
+//        try{
+//            sendText.put("text", message);
+//            socket.emit("message", sendText);
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//        }
+        socket.emit("message", message);
 
     }
 
@@ -233,45 +201,46 @@ public class ChatFragment extends Fragment {
         scrollToBottom();
     }
 
-    public void sendImage(Bitmap bitmap) {
+    public void sendImage(Bitmap bitmap)
+    {
         Log.i(TAG, "sendImage");
-       encodeImage(bitmap);
+        JSONObject sendData = new JSONObject();
+        try{
+            sendData.put("image", encodeImage(bitmap));
+  //          Bitmap bmp = decodeImage(sendData.getString("image"));
+            addImage(bitmap);
+            socket.emit("message",sendData);
+        }catch(JSONException e){
+
+        }
     }
 
-    private void addImage(Bitmap bmp) {
+    private void addImage(Bitmap bmp){
         mMessages.add(new Message.Builder(Message.TYPE_MESSAGE)
                 .image(bmp).build());
-        mAdapter = new MessageAdapter(mMessages);
+        mAdapter = new MessageAdapter( mMessages);
         mAdapter.notifyItemInserted(0);
         scrollToBottom();
     }
 
-    private String encodeImage(Bitmap bitmap) {
+    private String encodeImage(Bitmap bitmap){
         encodeImageInBackground encode = new encodeImageInBackground(bitmap, new ImageEncodeCallback() {
             @Override
             public void onEncodeCompleted(String image) {
                 encodedImage = image;
-                Log.i(TAG, "Encoded Image: " + encodedImage);
-                JSONObject sendData = new JSONObject();
-                try {
-                    sendData.put("receiver", "tim");
-                    sendData.put("image", encodedImage);
-                    socket.emit("message", sendData);
-                } catch (JSONException e) {
-
-                }
+                Log.i(TAG, "Encoded Image: "+encodedImage);
             }
         });
         encode.execute();
         return encodedImage;
     }
 
-    private Bitmap decodeImage(String data) {
-        byte[] b = Base64.decode(data, Base64.DEFAULT);
-        Bitmap bmp = BitmapFactory.decodeByteArray(b, 0, b.length);
+    private Bitmap decodeImage(String data)
+    {
+        byte[] b = Base64.decode(data,Base64.DEFAULT);
+        Bitmap bmp = BitmapFactory.decodeByteArray(b,0,b.length);
         return bmp;
     }
-
     private void scrollToBottom() {
         mMessagesView.scrollToPosition(mAdapter.getItemCount() - 1);
     }
@@ -282,14 +251,19 @@ public class ChatFragment extends Fragment {
         mListener = null;
     }
 
+    /**
+     * This interface must be implemented by activities that contain this
+     * fragment to allow an interaction in this fragment to be communicated
+     * to the activity and potentially other fragments contained in that
+     * activity.
+     * <p>
+     * See the Android Training lesson <a href=
+     * "http://developer.android.com/training/basics/fragments/communicating.html"
+     * >Communicating with Other Fragments</a> for more information.
+     */
     public interface OnFragmentInteractionListener {
+        // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        offlineSocket();
     }
 
     @Override
@@ -298,10 +272,7 @@ public class ChatFragment extends Fragment {
         socket.disconnect();
     }
 
-    /**
-     * Performing the image encoding action in the background.
-     */
-    private class encodeImageInBackground extends AsyncTask<Void, Void, String> {
+    private class encodeImageInBackground extends AsyncTask <Void, Void, String>{
         Bitmap bitmap;
         ImageEncodeCallback imageEncodeCallback;
 

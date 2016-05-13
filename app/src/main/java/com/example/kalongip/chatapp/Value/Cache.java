@@ -16,15 +16,18 @@ public class Cache {
     }
 
     public void setUser(User user) {
+        String username = user.getUsername();
         String uid = user.getUid();
         SharedPreferences prefs = context.getSharedPreferences("SHARE_PREFERENCES", Context.MODE_PRIVATE);
-        prefs.edit().putString("UserName", uid).apply();
+        prefs.edit().putString("UserName", username).apply();
+        prefs.edit().putString("UID", uid).apply();
     }
 
     public User getUser() {
         SharedPreferences prefs = context.getSharedPreferences("SHARE_PREFERENCES", Context.MODE_PRIVATE);
-        String uid =  prefs.getString("UserName", null);
-        User result = new User(uid);
+        String username =  prefs.getString("UserName", null);
+        String uid = prefs.getString("UID", null);
+        User result = new User(username, uid);
         return result;
     }
 }

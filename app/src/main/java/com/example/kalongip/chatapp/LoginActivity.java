@@ -165,8 +165,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mPasswordView.setError(null);
 
         // Store values at the time of the login attempt.
-        String email = mEmailView.getText().toString();
-        String password = mPasswordView.getText().toString();
+        final String email = mEmailView.getText().toString();
+        final String password = mPasswordView.getText().toString();
 
         boolean cancel = false;
         View focusView = null;
@@ -197,15 +197,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-//            mAuthTask = new UserLoginTask(email, password);
-//            mAuthTask.execute((Void) null);
             Firebase ref = new Firebase(Const.FIREBASE_URL);
             ref.authWithPassword(email, password, new Firebase.AuthResultHandler() {
                 @Override
                 public void onAuthenticated(AuthData authData) {
                     Log.d(TAG, "User ID: " + authData.getUid() + ", Provider: " + authData.getProvider());
                     cache = new Cache(getApplicationContext());
-                    User user = new User(authData.getUid());
+                    User user = new User(email, authData.getUid());
                     cache.setUser(user);
 
                     Intent intent = new Intent(getApplicationContext(), SocketActivity.class);
@@ -323,73 +321,5 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         int ADDRESS = 0;
         int IS_PRIMARY = 1;
     }
-
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-//    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-//
-//        private final String mEmail;
-//        private final String mPassword;
-//
-//        UserLoginTask(String email, String password) {
-//            mEmail = email;
-//            mPassword = password;
-//        }
-//
-//        @Override
-//        protected Boolean doInBackground(Void... params) {
-//            // TODO: attempt authentication against a network service.
-//
-//            Firebase ref = new Firebase("https://<YOUR-FIREBASE-APP>.firebaseio.com");
-//            ref.authWithPassword(mEmail, mPassword, new Firebase.AuthResultHandler() {
-//                @Override
-//                public void onAuthenticated(AuthData authData) {
-//                    Log.d(TAG, "User ID: " + authData.getUid() + ", Provider: " + authData.getProvider());
-//                    cache = new Cache(getApplicationContext());
-//                    User user = new User(authData.getUid());
-//                    cache.setUser(user);
-//                }
-//
-//                @Override
-//                public void onAuthenticationError(FirebaseError firebaseError) {
-//                    // there was an error
-//                }
-//            });
-//
-////            for (String credential : DUMMY_CREDENTIALS) {
-////                String[] pieces = credential.split(":");
-////                if (pieces[0].equals(mEmail)) {
-////                    // Account exists, return true if the password matches.
-////                    return pieces[1].equals(mPassword);
-////                }
-////            }
-//            return true;
-//        }
-//
-//        @Override
-//        protected void onPostExecute(final Boolean success) {
-//            mAuthTask = null;
-//            showProgress(false);
-//
-//            if (success) {
-//
-//                Intent intent = new Intent(getApplicationContext(), SocketActivity.class);
-//                finish();
-//                startActivity(intent);
-//            } else {
-//                mPasswordView.setError(getString(R.string.error_incorrect_password));
-//                mPasswordView.requestFocus();
-//            }
-//
-//        }
-//
-//        @Override
-//        protected void onCancelled() {
-//            mAuthTask = null;
-//            showProgress(false);
-//        }
-//    }
 }
 
