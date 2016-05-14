@@ -18,6 +18,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 
 import com.example.kalongip.chatapp.Callbacks.ImageEncodeCallback;
+import com.example.kalongip.chatapp.Model.RealmMessages;
 import com.example.kalongip.chatapp.Model.User;
 import com.example.kalongip.chatapp.Value.Cache;
 import com.github.nkzawa.emitter.Emitter;
@@ -30,7 +31,10 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+
+import io.realm.Realm;
 
 
 /**
@@ -58,9 +62,11 @@ public class ChatFragment extends Fragment {
     private RecyclerView mMessagesView;
     private RecyclerView.Adapter mAdapter;
     private static final String TAG = "ChatFragment";
-    private List<Message> mMessages = new ArrayList<>();
+//    private List<Message> mMessages = new ArrayList<>();
+    private List<RealmMessages> messages = new ArrayList<>();
 
     private OnFragmentInteractionListener mListener;
+    private Realm realm;
 
     private Socket socket;
     private Cache cache;
@@ -68,7 +74,8 @@ public class ChatFragment extends Fragment {
 
     private Emitter.Listener handleIncomingMessages = new Emitter.Listener() {
         @Override
-        public void call(final Object... args) {
+        public void call(final Object... args) { // Listen to incoming messages
+            if(getActivity() == null){return;}
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -79,14 +86,14 @@ public class ChatFragment extends Fragment {
                     try {
                         Log.i(TAG, "Parse Text");
                         message = data.getString("message").toString();
-                        addMessage(message);
+                        addMessage(message, false);
                     } catch (JSONException e) {
                         //  return;
                     }
                     try {
                         Log.i(TAG, "Parse Image");
                         imageText = data.getString("image");
-                        addImage(decodeImage(imageText));
+                        addImage(imageText, false);
                     } catch (JSONException e) {
                         //return;
                     }
@@ -97,7 +104,7 @@ public class ChatFragment extends Fragment {
 
     {
         try {
-            socket = IO.socket("http://192.168.20.168:3000");
+            socket = IO.socket("http://192.168.1.60:3000");
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
@@ -184,7 +191,8 @@ public class ChatFragment extends Fragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        mAdapter = new MessageAdapter(mMessages);
+       // mAdapter = new MessageAdapter(mMessages);
+        mAdapter = new MessageAdapter(messages);
 //        if (context instanceof OnFragmentInteractionListener) {
 //            mListener = (OnFragmentInteractionListener) context;
 //        } else {
@@ -215,36 +223,40 @@ public class ChatFragment extends Fragment {
     private void sendMessage() {
         String message = mInputMessageView.getText().toString().trim();
         mInputMessageView.setText("");
-        addMessage(message);
+        addMessage(message, true);
         JSONObject sendText = new JSONObject();
         try{
             sendText.put("text", message);
-            sendText.put("receiver", "abc@gmail.com");
+            sendText.put("receiver", user.getUsername());
             socket.emit("message", sendText);
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        socket.emit("message", message);
-
     }
 
-    private void addMessage(String message) {
-        mMessages.add(new Message.Builder(Message.TYPE_MESSAGE).message(message).build());
+    private void addMessage(String message, boolean fromME) {
+//        mMessages.add(new Message.Builder(Message.TYPE_MESSAGE).message(message).build());
+        RealmMessages realmMessages= new RealmMessages(user.getUsername(), "kalong925@gmail.com", message, fromME, false, new Date());
+        storeToLocalDB(realmMessages);
+        messages.add(realmMessages);
+        Log.i(TAG, "Timestamp for the message: " + new Date().toString());
         Log.d(TAG, message);
-        mAdapter = new MessageAdapter(mMessages);
+//        mAdapter = new MessageAdapter(mMessages);
+        mAdapter = new MessageAdapter(messages);
         mAdapter.notifyItemInserted(0);
         scrollToBottom();
     }
 
     public void sendImage(Bitmap bitmap) {
         Log.i(TAG, "sendImage");
-       encodeImage(bitmap);
+        encodeImage(bitmap);
     }
 
-    private void addImage(Bitmap bmp) {
-        mMessages.add(new Message.Builder(Message.TYPE_MESSAGE)
-                .image(bmp).build());
-        mAdapter = new MessageAdapter(mMessages);
+    private void addImage(String imageString, boolean fromME) {
+ //       mMessages.add(new Message.Builder(Message.TYPE_MESSAGE).image(bmp).build());
+        messages.add(new RealmMessages(user.getUsername(), "kalong925@gmail.com", imageString, fromME, true, new Date()));
+ //       mAdapter = new MessageAdapter(mMessages);
+        mAdapter = new MessageAdapter(messages);
         mAdapter.notifyItemInserted(0);
         scrollToBottom();
     }
@@ -254,10 +266,11 @@ public class ChatFragment extends Fragment {
             @Override
             public void onEncodeCompleted(String image) {
                 encodedImage = image;
+                addImage(encodedImage, true);
                 Log.i(TAG, "Encoded Image: " + encodedImage);
                 JSONObject sendData = new JSONObject();
                 try {
-                    sendData.put("receiver", "tim");
+                    sendData.put("receiver", user.getUsername());
                     sendData.put("image", encodedImage);
                     socket.emit("message", sendData);
                 } catch (JSONException e) {
@@ -269,12 +282,13 @@ public class ChatFragment extends Fragment {
         return encodedImage;
     }
 
-    private Bitmap decodeImage(String data) {
-        byte[] b = Base64.decode(data, Base64.DEFAULT);
-        Bitmap bmp = BitmapFactory.decodeByteArray(b, 0, b.length);
-        return bmp;
-    }
+    private void storeToLocalDB(RealmMessages realmMessages){
+        realm = Realm.getInstance(getContext());
+        realm.beginTransaction();
+        realm.copyToRealm(realmMessages);
+        realm.commitTransaction();
 
+    }
     private void scrollToBottom() {
         mMessagesView.scrollToPosition(mAdapter.getItemCount() - 1);
     }

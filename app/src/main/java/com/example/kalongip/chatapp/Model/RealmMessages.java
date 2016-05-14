@@ -1,5 +1,7 @@
 package com.example.kalongip.chatapp.Model;
 
+import java.util.Date;
+
 import io.realm.RealmObject;
 
 /**
@@ -7,14 +9,19 @@ import io.realm.RealmObject;
  */
 public class RealmMessages extends RealmObject {
     private String sender,receiver,content;
+    private boolean fromMe, isPhoto;
+    private Date date;
 
     public RealmMessages(){
 
     }
-    public RealmMessages(String sender, String receiver, String content) {
+    public RealmMessages(String sender, String receiver, String content, boolean fromMe, boolean isPhoto, Date date) {
         this.sender = sender;
         this.receiver = receiver;
         this.content = content;
+        this.fromMe = fromMe;
+        this.isPhoto = isPhoto;
+        this.date = date;
     }
 
     public String getSender() {
@@ -39,5 +46,29 @@ public class RealmMessages extends RealmObject {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public boolean isFromMe() {
+        return fromMe;
+    }
+
+    public void setFromMe(boolean fromMe) {
+        this.fromMe = fromMe;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public boolean isPhoto() {
+        return isPhoto;
+    }
+
+    public void setIsPhoto(boolean isPhoto) {
+        this.isPhoto = isPhoto;
     }
 }
