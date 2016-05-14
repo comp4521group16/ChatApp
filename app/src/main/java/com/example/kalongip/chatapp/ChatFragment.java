@@ -254,7 +254,9 @@ public class ChatFragment extends Fragment {
 
     private void addImage(String imageString, boolean fromME) {
  //       mMessages.add(new Message.Builder(Message.TYPE_MESSAGE).image(bmp).build());
-        messages.add(new RealmMessages(user.getUsername(), "kalong925@gmail.com", imageString, fromME, true, new Date()));
+        RealmMessages realmMessages = new RealmMessages(user.getUsername(), "kalong925@gmail.com", imageString, fromME, true, new Date());
+        storeToLocalDB(realmMessages);
+        messages.add(realmMessages);
  //       mAdapter = new MessageAdapter(mMessages);
         mAdapter = new MessageAdapter(messages);
         mAdapter.notifyItemInserted(0);
