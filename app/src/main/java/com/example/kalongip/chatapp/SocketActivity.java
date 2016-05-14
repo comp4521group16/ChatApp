@@ -9,6 +9,7 @@ import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.FrameLayout;
 
 import com.example.kalongip.chatapp.Value.Cache;
 
@@ -22,6 +23,11 @@ public class SocketActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_socket);
 
+        FrameLayout frameLayout = (FrameLayout) findViewById(R.id.fragment_container);
+        if (frameLayout != null) {
+            ConversationListFragment conversationListFragment = new ConversationListFragment();
+            getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, conversationListFragment).commit();
+        }
     }
 
     @Override

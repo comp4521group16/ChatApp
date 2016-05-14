@@ -9,9 +9,17 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.example.kalongip.chatapp.SocketActivity">
 
-    <fragment
-        android:id="@+id/chat"
-        class="com.example.kalongip.chatapp.ChatFragment"
+    <!--<fragment-->
+        <!--android:id="@+id/chat"-->
+        <!--class="com.example.kalongip.chatapp.ChatFragment"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"/>-->
+
+    <FrameLayout
+        android:id="@+id/fragment_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent">
+
+    </FrameLayout>
+
 </RelativeLayout>
