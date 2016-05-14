@@ -3,4 +3,8 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="msgSend">#FF5384EE</color>
+    <color name="msgReceive">#FFDCD4D4</color>
+    <color name="icon">#FFFFFF</color>
+    <color name="colorDark">#000000</color>
 </resources>
