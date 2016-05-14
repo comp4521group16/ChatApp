@@ -34,6 +34,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import io.realm.Realm;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -64,6 +66,7 @@ public class ChatFragment extends Fragment {
     private List<RealmMessages> messages = new ArrayList<>();
 
     private OnFragmentInteractionListener mListener;
+    private Realm realm;
 
     private Socket socket;
     private Cache cache;
@@ -233,7 +236,9 @@ public class ChatFragment extends Fragment {
 
     private void addMessage(String message, boolean fromME) {
 //        mMessages.add(new Message.Builder(Message.TYPE_MESSAGE).message(message).build());
-        messages.add(new RealmMessages(user.getUsername(), "kalong925@gmail.com", message, fromME, false, new Date()));
+        RealmMessages realmMessages= new RealmMessages(user.getUsername(), "kalong925@gmail.com", message, fromME, false, new Date());
+        storeToLocalDB(realmMessages);
+        messages.add(realmMessages);
         Log.i(TAG, "Timestamp for the message: " + new Date().toString());
         Log.d(TAG, message);
 //        mAdapter = new MessageAdapter(mMessages);
@@ -277,6 +282,13 @@ public class ChatFragment extends Fragment {
         return encodedImage;
     }
 
+    private void storeToLocalDB(RealmMessages realmMessages){
+        realm = Realm.getInstance(getContext());
+        realm.beginTransaction();
+        realm.copyToRealm(realmMessages);
+        realm.commitTransaction();
+
+    }
     private void scrollToBottom() {
         mMessagesView.scrollToPosition(mAdapter.getItemCount() - 1);
     }

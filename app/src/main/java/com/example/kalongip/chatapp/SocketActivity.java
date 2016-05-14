@@ -33,12 +33,17 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
+
 
 public class SocketActivity extends AppCompatActivity {
 
     private static final int RESULT_LOAD_IMAGE = 1;
     private static final int REQUEST_CAMERA = 10;
     static final int REQUEST_TAKE_PHOTO = 2;
+    private Realm realm;
+    private RealmConfiguration realmConfig;
     public static Handler mHandler;
     private String mCurrentPhotoPath=null;
     PopupWindow popupWindow;
@@ -47,6 +52,10 @@ public class SocketActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_socket);
+        // Create the Realm configuration
+        realmConfig = new RealmConfiguration.Builder(this).build();
+        // Open the Realm for the UI thread.
+        realm = Realm.getInstance(realmConfig);
         mHandler = new Handler(){
             @Override
             public void handleMessage(Message msg) {
