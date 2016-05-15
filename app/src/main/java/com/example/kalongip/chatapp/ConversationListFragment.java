@@ -15,6 +15,7 @@ import com.example.kalongip.chatapp.Model.User;
 import com.example.kalongip.chatapp.Value.Cache;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -36,15 +37,16 @@ public class ConversationListFragment extends Fragment{
         super.onActivityCreated(savedInstanceState);
         cache = new Cache(getContext());
         user = cache.getUser();
+        Date date = new Date();
         for (int i = 0; i < 3; i++){
-            RealmMessages msg1 = new RealmMessages(user.getUsername(), "abc@gmail.com", "hello");
+            RealmMessages msg1 = new RealmMessages(user.getUsername(), "abc@gmail.com", "hello", true, true, date);
             messages.add(msg1);
         }
         RecyclerView recyclerView = (RecyclerView) getView().findViewById(R.id.rview);
         recyclerView.setHasFixedSize(true);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(linearLayoutManager);
-        adapter = new ConversationListAdapter(messages);
+        adapter = new ConversationListAdapter(this.getContext(), messages);
         recyclerView.setAdapter(adapter);
     }
 
