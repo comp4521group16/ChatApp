@@ -33,8 +33,10 @@ import com.example.kalongip.chatapp.Model.User;
 import com.example.kalongip.chatapp.Value.Cache;
 import com.example.kalongip.chatapp.Value.Const;
 import com.firebase.client.AuthData;
+import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 import com.pushbots.push.Pushbots;
 
 import java.util.ArrayList;
@@ -213,10 +215,24 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 @Override
                 public void onAuthenticated(AuthData authData) {
                     Log.d(TAG, "User ID: " + authData.getUid() + ", Provider: " + authData.getProvider());
-                    cache = new Cache(getApplicationContext());
-                    User user = new User(email, authData.getUid());
-                    cache.setUser(user);
-                    cache.setLoggedIn(true);
+
+                    Firebase userRef = new Firebase(Const.FIREBASE_URL + "/users/" + authData.getUid());
+                    userRef.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            User user = dataSnapshot.getValue(User.class);
+                            Log.d(TAG, "Login by :" + user.toString());
+                            cache = new Cache(getApplicationContext());
+                            User newUser = new User(user.getEmail(), user.getUsername(), user.getUid());
+                            cache.setUser(newUser);
+                            cache.setLoggedIn(true);
+                        }
+
+                        @Override
+                        public void onCancelled(FirebaseError firebaseError) {
+
+                        }
+                    });
 
                     Pushbots.sharedInstance().setAlias(email);
                     Intent intent = new Intent(getApplicationContext(), SocketActivity.class);

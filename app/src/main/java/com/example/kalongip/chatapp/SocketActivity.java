@@ -14,6 +14,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.FrameLayout;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,6 +53,12 @@ public class SocketActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_socket);
+
+        FrameLayout frameLayout = (FrameLayout) findViewById(R.id.fragment_container);
+        if (frameLayout != null) {
+            ConversationListFragment conversationListFragment = new ConversationListFragment();
+            getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, conversationListFragment).commit();
+        }
         // Create the Realm configuration
         realmConfig = new RealmConfiguration.Builder(this).build();
         // Open the Realm for the UI thread.

@@ -21,6 +21,7 @@ public class RegisterActivity extends AppCompatActivity {
     private static final String TAG = RegisterActivity.class.getSimpleName();
 
     private AutoCompleteTextView newEmail;
+    private AutoCompleteTextView newUsername;
     private EditText newPassword;
     private EditText confirmPassword;
 
@@ -36,6 +37,7 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register);
 
         newEmail = (AutoCompleteTextView) findViewById(R.id.new_email);
+        newUsername = (AutoCompleteTextView) findViewById(R.id.new_username);
         newPassword = (EditText) findViewById(R.id.new_password);
         confirmPassword = (EditText) findViewById(R.id.confirm_password);
 
@@ -53,7 +55,8 @@ public class RegisterActivity extends AppCompatActivity {
         newPassword.setError(null);
         confirmPassword.setError(null);
 
-        String email = newEmail.getText().toString();
+        final String email = newEmail.getText().toString();
+        final String username = newUsername.getText().toString();
         String password = newPassword.getText().toString();
         String password2 = confirmPassword.getText().toString();
 
@@ -63,6 +66,12 @@ public class RegisterActivity extends AppCompatActivity {
         if (TextUtils.isEmpty(password) || TextUtils.isEmpty(password2) || !password.equals(password2)){
             confirmPassword.setError("Invalid password!");
             focusView = confirmPassword;
+            cancel = true;
+        }
+
+        if (TextUtils.isEmpty(username)){
+            newUsername.setError("This field is required");
+            focusView = newUsername;
             cancel = true;
         }
 
@@ -80,11 +89,15 @@ public class RegisterActivity extends AppCompatActivity {
             focusView.requestFocus();
         } else {
             final ProgressDialog progressDialog = ProgressDialog.show(this, "Loading", "please wait...");
-            Firebase myFirebaseRef = new Firebase(Const.FIREBASE_URL);
+            final Firebase myFirebaseRef = new Firebase(Const.FIREBASE_URL);
             myFirebaseRef.createUser(email, password, new Firebase.ValueResultHandler<Map<String, Object>>() {
                 @Override
                 public void onSuccess(Map<String, Object> result) {
                     Log.d(TAG, "Successfully created user account with uid: " + result.get("uid"));
+                    Firebase userRef = myFirebaseRef.child("users").child(result.get("uid").toString());
+                    userRef.child("email").setValue(email);
+                    userRef.child("username").setValue(username);
+                    userRef.child("uid").setValue(result.get("uid"));
                     finish();
                 }
                 @Override
