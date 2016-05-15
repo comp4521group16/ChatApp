@@ -226,6 +226,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                             User newUser = new User(user.getEmail(), user.getUsername(), user.getUid());
                             cache.setUser(newUser);
                             cache.setLoggedIn(true);
+                            Pushbots.sharedInstance().setAlias(user.getUsername());
+
                         }
 
                         @Override
@@ -233,8 +235,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
                         }
                     });
-
-                    Pushbots.sharedInstance().setAlias(email);
                     Intent intent = new Intent(getApplicationContext(), SocketActivity.class);
                     finish();
                     startActivity(intent);
