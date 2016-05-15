@@ -94,8 +94,9 @@ public class RegisterActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(Map<String, Object> result) {
                     Log.d(TAG, "Successfully created user account with uid: " + result.get("uid"));
-                    Firebase userRef = myFirebaseRef.child("users").child(username);
+                    Firebase userRef = myFirebaseRef.child("users").child(result.get("uid").toString());
                     userRef.child("email").setValue(email);
+                    userRef.child("username").setValue(username);
                     userRef.child("uid").setValue(result.get("uid"));
                     finish();
                 }

@@ -38,9 +38,11 @@ public class ConversationListAdapter extends RecyclerView.Adapter<ConversationLi
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.sender.setText(messages.get(position).getSender());
+        holder.receiver.setText(messages.get(position).getReceiver());
         holder.content.setText(messages.get(position).getContent());
-        holder.date.setText(messages.get(position).getDate().toString());
+//        holder.date.setText(messages.get(position).getDate().toString());
+        holder.date.setText("1/1/2011");
+
         holder.card.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -48,7 +50,8 @@ public class ConversationListAdapter extends RecyclerView.Adapter<ConversationLi
                 ChatFragment chatFragment = ChatFragment.newInstance("", "");
                 FragmentManager fm = ((AppCompatActivity) context).getSupportFragmentManager();
                 FragmentTransaction ft = fm.beginTransaction();
-                ft.replace(R.id.fragment_container, chatFragment).commit();
+                ft.replace(R.id.fragment_container, chatFragment);
+                ft.addToBackStack(null).commit();
             }
         });
     }
@@ -59,7 +62,7 @@ public class ConversationListAdapter extends RecyclerView.Adapter<ConversationLi
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
-        TextView sender;
+        TextView receiver;
         TextView content;
         TextView date;
         CardView card;
@@ -67,7 +70,7 @@ public class ConversationListAdapter extends RecyclerView.Adapter<ConversationLi
         public ViewHolder(View itemView) {
             super(itemView);
             // Get reference to the view
-            sender = (TextView) itemView.findViewById(R.id.receiver);
+            receiver = (TextView) itemView.findViewById(R.id.receiver);
             content = (TextView) itemView.findViewById(R.id.content);
             date = (TextView) itemView.findViewById(R.id.sendDate);
             card = (CardView) itemView.findViewById(R.id.card);
