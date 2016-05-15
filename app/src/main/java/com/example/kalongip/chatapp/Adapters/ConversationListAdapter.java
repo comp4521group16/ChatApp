@@ -37,7 +37,7 @@ public class ConversationListAdapter extends RecyclerView.Adapter<ConversationLi
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.receiver.setText(messages.get(position).getReceiver());
         holder.content.setText(messages.get(position).getContent());
 //        holder.date.setText(messages.get(position).getDate().toString());
@@ -47,7 +47,7 @@ public class ConversationListAdapter extends RecyclerView.Adapter<ConversationLi
             @Override
             public void onClick(View v) {
                 //TODO set OnClick
-                ChatFragment chatFragment = ChatFragment.newInstance("", "");
+                ChatFragment chatFragment = ChatFragment.newInstance((String) holder.receiver.getText());
                 FragmentManager fm = ((AppCompatActivity) context).getSupportFragmentManager();
                 FragmentTransaction ft = fm.beginTransaction();
                 ft.replace(R.id.fragment_container, chatFragment);

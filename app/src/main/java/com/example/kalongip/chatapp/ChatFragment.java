@@ -2,7 +2,6 @@ package com.example.kalongip.chatapp;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -48,13 +47,11 @@ import io.realm.Realm;
 public class ChatFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private static final String RECEIVER = "receiver";
     private static final String JOIN = "join";
     private static final String OFFLINE = "offline";
     // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private String receiverName;
 
     private String encodedImage = null;
 
@@ -114,20 +111,11 @@ public class ChatFragment extends Fragment {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment ChatFragment.
-     */
     // TODO: Rename and change types and number of parameters
-    public static ChatFragment newInstance(String param1, String param2) {
+    public static ChatFragment newInstance(String name) {
         ChatFragment fragment = new ChatFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putString(RECEIVER, name);
         fragment.setArguments(args);
         return fragment;
     }
@@ -137,9 +125,9 @@ public class ChatFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            receiverName = getArguments().getString(RECEIVER);
         }
+        Log.d(TAG, "Receiver: " + receiverName);
         socket.connect();
         socket.on("message", handleIncomingMessages);
         cache = new Cache(getContext());
