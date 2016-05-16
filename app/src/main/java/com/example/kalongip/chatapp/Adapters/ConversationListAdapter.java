@@ -1,6 +1,7 @@
 package com.example.kalongip.chatapp.Adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
@@ -14,6 +15,7 @@ import android.widget.TextView;
 import com.example.kalongip.chatapp.ChatFragment;
 import com.example.kalongip.chatapp.Model.RealmMessages;
 import com.example.kalongip.chatapp.R;
+import com.example.kalongip.chatapp.SocketActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,10 +26,12 @@ import java.util.List;
 public class ConversationListAdapter extends RecyclerView.Adapter<ConversationListAdapter.ViewHolder>{
     private List<RealmMessages> messages = new ArrayList<>(); // A List of messages passed from ConversationListFragment
     private Context context;
+    private boolean isSearch;
 
-    public ConversationListAdapter(Context context, List <RealmMessages> messages){
-        this.context = context;
+    public ConversationListAdapter(List<RealmMessages> messages, Context context, boolean isSearch) {
         this.messages = messages;
+        this.context = context;
+        this.isSearch = isSearch;
     }
 
     @Override
@@ -47,11 +51,20 @@ public class ConversationListAdapter extends RecyclerView.Adapter<ConversationLi
             @Override
             public void onClick(View v) {
                 //TODO set OnClick
-                ChatFragment chatFragment = ChatFragment.newInstance((String) holder.receiver.getText());
-                FragmentManager fm = ((AppCompatActivity) context).getSupportFragmentManager();
-                FragmentTransaction ft = fm.beginTransaction();
-                ft.replace(R.id.fragment_container, chatFragment);
-                ft.addToBackStack(null).commit();
+                String receiver = (String) holder.receiver.getText();
+                if (!isSearch){
+                    ChatFragment chatFragment = ChatFragment.newInstance(receiver);
+                    FragmentManager fm = ((AppCompatActivity) context).getSupportFragmentManager();
+                    FragmentTransaction ft = fm.beginTransaction();
+                    ft.replace(R.id.fragment_container, chatFragment);
+                    ft.addToBackStack(null).commit();
+                } else {
+                    ((AppCompatActivity) context).finish();
+                    Intent intent = new Intent(context, SocketActivity.class);
+                    intent.putExtra("goChatRoomDirectly", true);
+                    intent.putExtra("receiver", receiver);
+                    context.startActivity(intent);
+                }
             }
         });
     }
@@ -61,7 +74,7 @@ public class ConversationListAdapter extends RecyclerView.Adapter<ConversationLi
         return messages.size();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    public static class ViewHolder extends RecyclerView.ViewHolder{
         TextView receiver;
         TextView content;
         TextView date;
@@ -74,11 +87,6 @@ public class ConversationListAdapter extends RecyclerView.Adapter<ConversationLi
             content = (TextView) itemView.findViewById(R.id.content);
             date = (TextView) itemView.findViewById(R.id.sendDate);
             card = (CardView) itemView.findViewById(R.id.card);
-        }
-
-        @Override
-        public void onClick(View v) {
-
         }
     }
 }

@@ -18,6 +18,7 @@ import com.example.kalongip.chatapp.Value.Const;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
 
 import java.util.ArrayList;
@@ -34,9 +35,33 @@ public class ConversationListFragment extends Fragment{
     private Cache cache;
     private User user;
 
+    private String searchName;
+
     ConversationListAdapter adapter;
     // A List contains all the messages related to the user
     List<RealmMessages> messages = new ArrayList<>();
+
+    public ConversationListFragment() {
+        // Required empty public constructor
+    }
+
+    public static ConversationListFragment newInstance(String searchName){
+        Log.d(TAG, "newInstance(String) called, searchName = " + searchName);
+        ConversationListFragment conversationListFragment = new ConversationListFragment();
+        Bundle extra = new Bundle();
+        extra.putString("search", searchName);
+        conversationListFragment.setArguments(extra);
+        return conversationListFragment;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Bundle bundle = this.getArguments();
+        if (bundle != null) {
+            this.searchName = bundle.getString("search");
+        }
+    }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -44,23 +69,42 @@ public class ConversationListFragment extends Fragment{
         cache = new Cache(getContext());
         user = cache.getUser();
         Log.d(TAG, "Current user: " + user.toString());
-//        Date date = new Date();
-//        for (int i = 0; i < 3; i++){
-//            RealmMessages msg1 = new RealmMessages(user.getUsername(), "abc@gmail.com", "hello", true, true, date);
-//            messages.add(msg1);
-//        }
 
-        Firebase userRef = new Firebase(Const.FIREBASE_URL + "/users");
+        final Firebase userRef = new Firebase(Const.FIREBASE_URL + "/users");
+
         userRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d(TAG, "User list called!" + dataSnapshot);
                 messages.clear();
-                for (DataSnapshot snapshot: dataSnapshot.getChildren()){
-                    User users = snapshot.getValue(User.class);
-//                    Log.d(TAG, users.getUsername());
-                    Date date = new Date();
-                    RealmMessages msg = new RealmMessages(user.getUsername(), users.getUsername(), "hello", true, true, date);
-                    messages.add(msg);
+
+                if (searchName != null){
+                    Query queryRef = userRef.orderByChild("username").equalTo(searchName);
+                    queryRef.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            Log.d(TAG, "Query called!" + dataSnapshot);
+                            messages.clear();
+                            for (DataSnapshot snapshot: dataSnapshot.getChildren()){
+                                User users = snapshot.getValue(User.class);
+                                Date date = new Date();
+                                RealmMessages msg = new RealmMessages(user.getUsername(), users.getUsername(), "hello", true, true, date);
+                                messages.add(msg);
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(FirebaseError firebaseError) {
+
+                        }
+                    });
+                } else {
+                    for (DataSnapshot snapshot: dataSnapshot.getChildren()){
+                        User users = snapshot.getValue(User.class);
+                        Date date = new Date();
+                        RealmMessages msg = new RealmMessages(user.getUsername(), users.getUsername(), "hello", true, true, date);
+                        messages.add(msg);
+                    }
                 }
             }
 
@@ -70,6 +114,8 @@ public class ConversationListFragment extends Fragment{
             }
 
         });
+
+
     }
 
     @Nullable
@@ -80,7 +126,11 @@ public class ConversationListFragment extends Fragment{
         recyclerView.setHasFixedSize(true);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(linearLayoutManager);
-        adapter = new ConversationListAdapter(this.getContext(), messages);
+        if (searchName != null) {
+            adapter = new ConversationListAdapter(messages, this.getContext(), true);
+        }else {
+            adapter = new ConversationListAdapter(messages, this.getContext(), false);
+        }
         recyclerView.setAdapter(adapter);
         return view;
     }

@@ -4,6 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".SocketActivity">
     <item
+        android:id="@+id/action_search"
+        android:title="@string/action_search"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_camera"
         android:title="@string/action_camera"
         app:showAsAction="never" />
