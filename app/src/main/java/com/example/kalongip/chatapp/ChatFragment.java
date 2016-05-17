@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Base64;
@@ -59,7 +60,7 @@ public class ChatFragment extends Fragment {
     private RecyclerView mMessagesView;
     private RecyclerView.Adapter mAdapter;
     private static final String TAG = "ChatFragment";
-//    private List<Message> mMessages = new ArrayList<>();
+    //    private List<Message> mMessages = new ArrayList<>();
     private List<RealmMessages> messages = new ArrayList<>();
 
     private OnFragmentInteractionListener mListener;
@@ -72,7 +73,9 @@ public class ChatFragment extends Fragment {
     private Emitter.Listener handleIncomingMessages = new Emitter.Listener() {
         @Override
         public void call(final Object... args) { // Listen to incoming messages
-            if(getActivity() == null){return;}
+            if (getActivity() == null) {
+                return;
+            }
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -132,6 +135,7 @@ public class ChatFragment extends Fragment {
         socket.on("message", handleIncomingMessages);
         cache = new Cache(getContext());
         user = cache.getUser();
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(receiverName);
     }
 
     @Override
@@ -179,8 +183,10 @@ public class ChatFragment extends Fragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-       // mAdapter = new MessageAdapter(mMessages);
+        // mAdapter = new MessageAdapter(mMessages);
+        messages = new RealmQuery(getContext()).retrieveChatHistoryByUserName(receiverName);
         mAdapter = new MessageAdapter(messages);
+        mAdapter.notifyDataSetChanged();
 //        if (context instanceof OnFragmentInteractionListener) {
 //            mListener = (OnFragmentInteractionListener) context;
 //        } else {
@@ -213,9 +219,11 @@ public class ChatFragment extends Fragment {
         mInputMessageView.setText("");
         addMessage(message, true);
         JSONObject sendText = new JSONObject();
-        try{
+        try {
             sendText.put("text", message);
             sendText.put("receiver", receiverName);
+            sendText.put("sender", user.getUsername());
+            sendText.put("isPhoto", "false");
             socket.emit("message", sendText);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -224,7 +232,14 @@ public class ChatFragment extends Fragment {
 
     private void addMessage(String message, boolean fromME) {
 //        mMessages.add(new Message.Builder(Message.TYPE_MESSAGE).message(message).build());
-        RealmMessages realmMessages= new RealmMessages(user.getUsername(), "kalong925@gmail.com", message, fromME, false, new Date());
+        RealmMessages realmMessages = null;
+        if (fromME) {
+            Log.i(TAG, "A text message sent to " + receiverName);
+            realmMessages = new RealmMessages(user.getUsername(), receiverName, message, fromME, false, new Date());
+        } else {
+            Log.i(TAG, "A text message received from "+ receiverName);
+            realmMessages = new RealmMessages(receiverName, user.getUsername(), message, fromME, false, new Date());
+        }
         storeToLocalDB(realmMessages);
         messages.add(realmMessages);
         Log.i(TAG, "Timestamp for the message: " + new Date().toString());
@@ -241,11 +256,18 @@ public class ChatFragment extends Fragment {
     }
 
     private void addImage(String imageString, boolean fromME) {
- //       mMessages.add(new Message.Builder(Message.TYPE_MESSAGE).image(bmp).build());
-        RealmMessages realmMessages = new RealmMessages(user.getUsername(), "kalong925@gmail.com", imageString, fromME, true, new Date());
+        //       mMessages.add(new Message.Builder(Message.TYPE_MESSAGE).image(bmp).build());
+        RealmMessages realmMessages = null;
+        if(fromME){
+            Log.i(TAG, "A photo sent to " + receiverName);
+            realmMessages = new RealmMessages(user.getUsername(), receiverName, imageString, fromME, true, new Date());
+        }else {
+            Log.i(TAG, "A photo received from "+ receiverName);
+            realmMessages = new RealmMessages(receiverName, user.getUsername(), imageString, fromME, true, new Date());
+        }
         storeToLocalDB(realmMessages);
         messages.add(realmMessages);
- //       mAdapter = new MessageAdapter(mMessages);
+        //       mAdapter = new MessageAdapter(mMessages);
         mAdapter = new MessageAdapter(messages);
         mAdapter.notifyItemInserted(0);
         scrollToBottom();
@@ -260,8 +282,10 @@ public class ChatFragment extends Fragment {
                 Log.i(TAG, "Encoded Image: " + encodedImage);
                 JSONObject sendData = new JSONObject();
                 try {
-                    sendData.put("receiver", user.getUsername());
+                    sendData.put("receiver", receiverName);
                     sendData.put("image", encodedImage);
+                    sendData.put("sender", user.getUsername());
+                    sendData.put("isPhoto", "true");
                     socket.emit("message", sendData);
                 } catch (JSONException e) {
 
@@ -272,13 +296,14 @@ public class ChatFragment extends Fragment {
         return encodedImage;
     }
 
-    private void storeToLocalDB(RealmMessages realmMessages){
+    private void storeToLocalDB(RealmMessages realmMessages) {
         realm = Realm.getInstance(getContext());
         realm.beginTransaction();
         realm.copyToRealm(realmMessages);
         realm.commitTransaction();
 
     }
+
     private void scrollToBottom() {
         mMessagesView.scrollToPosition(mAdapter.getItemCount() - 1);
     }
