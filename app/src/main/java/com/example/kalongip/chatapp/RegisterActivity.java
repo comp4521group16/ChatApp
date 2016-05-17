@@ -102,7 +102,7 @@ public class RegisterActivity extends AppCompatActivity {
                     userRef.child("email").setValue(email);
                     userRef.child("username").setValue(username);
                     userRef.child("uid").setValue(result.get("uid"));
-                    friends.add("test");
+                    friends.add("Welcome to Textor!");
                     userRef.child("friends").setValue(friends);
                     finish();
                 }

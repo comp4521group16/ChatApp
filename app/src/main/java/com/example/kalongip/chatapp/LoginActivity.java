@@ -29,6 +29,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.example.kalongip.chatapp.Handler.customHandler;
+import com.example.kalongip.chatapp.Model.RealmFriendList;
 import com.example.kalongip.chatapp.Model.User;
 import com.example.kalongip.chatapp.Value.Cache;
 import com.example.kalongip.chatapp.Value.Const;
@@ -41,6 +42,10 @@ import com.pushbots.push.Pushbots;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
+import io.realm.RealmResults;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -66,6 +71,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private View mProgressView;
     private View mLoginFormView;
     private Cache cache;
+
+    private Realm realm;
+    private RealmConfiguration realmConfig;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,6 +125,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         // Pushbots setting
         Pushbots.sharedInstance().init(this);
         Pushbots.sharedInstance().setCustomHandler(customHandler.class);
+
+        // Create the Realm configuration
+        realmConfig = new RealmConfiguration.Builder(this).build();
+        // Open the Realm for the UI thread.
+        realm = Realm.getInstance(realmConfig);
     }
 
     private void populateAutoComplete() {
@@ -222,6 +235,20 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             User user = dataSnapshot.getValue(User.class);
                             Log.d(TAG, "Login by :" + user.toString());
+
+                            //store fdlist to realm
+                            List<String> friends = user.getFriends();
+                            RealmQuery query = new RealmQuery(getApplicationContext());
+                            RealmResults<RealmFriendList> results= query.retrieveFriendList();
+                            realm.beginTransaction();
+                            results.clear();
+                            for (int i = 0; i < friends.size(); i++){
+                                String fd = friends.get(i);
+                                RealmFriendList friendList = new RealmFriendList(i, fd);
+                                realm.copyToRealm(friendList);
+                            }
+                            realm.commitTransaction();
+
                             cache = new Cache(getApplicationContext());
                             User newUser = new User(user.getEmail(), user.getUid(), user.getUsername(), user.getFriends());
                             cache.setUser(newUser);

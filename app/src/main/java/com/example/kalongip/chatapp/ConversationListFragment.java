@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.kalongip.chatapp.Adapters.ConversationListAdapter;
+import com.example.kalongip.chatapp.Model.RealmFriendList;
 import com.example.kalongip.chatapp.Model.RealmMessages;
 import com.example.kalongip.chatapp.Model.User;
 import com.example.kalongip.chatapp.Value.Cache;
@@ -24,6 +25,9 @@ import com.firebase.client.ValueEventListener;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import io.realm.Realm;
+import io.realm.RealmResults;
 
 /**
  * Created by timothy on 7/4/2016.
@@ -40,6 +44,11 @@ public class ConversationListFragment extends Fragment{
     ConversationListAdapter adapter;
     // A List contains all the messages related to the user
     List<RealmMessages> messages = new ArrayList<>();
+
+    Realm realm;
+
+    final Date date = new Date();
+
 
     public ConversationListFragment() {
         // Required empty public constructor
@@ -70,52 +79,31 @@ public class ConversationListFragment extends Fragment{
         user = cache.getUser();
         Log.d(TAG, "Current user: " + user.toString());
 
-        final Firebase userRef = new Firebase(Const.FIREBASE_URL + "/users");
-
-        userRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.d(TAG, "User list called!" + dataSnapshot);
-                messages.clear();
-
-                if (searchName != null){
-                    Query queryRef = userRef.orderByChild("username").equalTo(searchName);
-                    queryRef.addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            Log.d(TAG, "Query called!" + dataSnapshot);
-                            messages.clear();
-                            for (DataSnapshot snapshot: dataSnapshot.getChildren()){
-                                User users = snapshot.getValue(User.class);
-                                Date date = new Date();
-                                RealmMessages msg = new RealmMessages(user.getUsername(), users.getUsername(), "hello", true, true, date);
-                                messages.add(msg);
-                                adapter.notifyDataSetChanged();
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(FirebaseError firebaseError) {
-
-                        }
-                    });
-                } else {
+        if (searchName != null){
+            //Call from SearchActivity
+            final Firebase userRef = new Firebase(Const.FIREBASE_URL + "/users");
+            Query queryRef = userRef.orderByChild("username").equalTo(searchName);
+            queryRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    Log.d(TAG, "Query called!" + dataSnapshot);
+                    messages.clear();
                     for (DataSnapshot snapshot: dataSnapshot.getChildren()){
                         User users = snapshot.getValue(User.class);
-                        Date date = new Date();
                         RealmMessages msg = new RealmMessages(user.getUsername(), users.getUsername(), "hello", true, true, date);
                         messages.add(msg);
                         adapter.notifyDataSetChanged();
                     }
                 }
-            }
 
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
+                @Override
+                public void onCancelled(FirebaseError firebaseError) {
 
-            }
+                }
+            });
+        } else {
 
-        });
+        }
 
 
     }
@@ -135,5 +123,22 @@ public class ConversationListFragment extends Fragment{
         }
         recyclerView.setAdapter(adapter);
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        //Call from SocketActivity
+        if (searchName == null) {
+            messages.clear();
+            realm = Realm.getInstance(getContext());
+            RealmQuery query = new RealmQuery(getContext());
+            RealmResults<RealmFriendList> results = query.retrieveFriendList();
+            for (RealmFriendList fd: results){
+                RealmMessages msg = new RealmMessages(user.getUsername(), fd.getaFriend(), "last msg", false, false, date);
+                messages.add(msg);
+            }
+            adapter.notifyDataSetChanged();
+        }
     }
 }

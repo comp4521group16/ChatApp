@@ -2,6 +2,7 @@ package com.example.kalongip.chatapp;
 
 import android.content.Context;
 
+import com.example.kalongip.chatapp.Model.RealmFriendList;
 import com.example.kalongip.chatapp.Model.RealmMessages;
 
 import io.realm.Realm;
@@ -20,6 +21,10 @@ public class RealmQuery {
     public RealmResults<RealmMessages> retrieveChatHistoryByUserName(String friend){
         return realm.where(RealmMessages.class).beginGroup()
                 .equalTo("sender", friend).or().equalTo("receiver", friend).endGroup().findAll();
+    }
+
+    public RealmResults<RealmFriendList> retrieveFriendList(){
+        return realm.where(RealmFriendList.class).findAll();
     }
 
 }

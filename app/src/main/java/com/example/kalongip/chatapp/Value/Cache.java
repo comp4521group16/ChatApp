@@ -2,6 +2,7 @@ package com.example.kalongip.chatapp.Value;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.example.kalongip.chatapp.Model.User;
 
@@ -12,6 +13,7 @@ import java.util.List;
  * Created by kalongip on 11/4/16.
  */
 public class Cache {
+    private static final String TAG = Cache.class.getSimpleName();
     private Context context;
 
     public Cache(Context context){
@@ -27,12 +29,16 @@ public class Cache {
         prefs.edit().putString("Email", email).apply();
         prefs.edit().putString("UserName", username).apply();
         prefs.edit().putString("UID", uid).apply();
+//        Set<String> set = new HashSet<String>();
+//        set.addAll(friends);
+//        prefs.edit().putStringSet("FriendList", set);
         prefs.edit().putInt("FriendListSize", friends.size());
         for (int i = 0; i < friends.size(); i++){
             String key = "friend" + i;
             String fd = friends.get(i);
             prefs.edit().putString(key, fd).apply();
         }
+        Log.d(TAG, "Set fd list: " + friends);
     }
 
     public User getUser() {
@@ -45,8 +51,11 @@ public class Cache {
         for (int i = 0; i < length; i++){
             String key = "friend" + i;
             String fd = prefs.getString(key, null);
-            friends.set(i, fd);
+            friends.add(i, fd);
         }
+//        Set<String> set = prefs.getStringSet("FriendList", null);
+//        List<String> friends = (List<String>) set;
+        Log.d(TAG, "Set fd list: " + friends);
         User result = new User(email, uid, username, friends);
         return result;
     }
