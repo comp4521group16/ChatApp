@@ -5,11 +5,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import com.example.kalongip.chatapp.Model.RealmMessages;
+import com.example.kalongip.chatapp.SocketActivity;
 import com.pushbots.push.PBNotificationIntent;
 import com.pushbots.push.Pushbots;
 import com.pushbots.push.utils.PBConstants;
 
+import java.util.Date;
 import java.util.HashMap;
+
+import io.realm.Realm;
 
 /**
  * This handler handles the action after receiving push notifications
@@ -47,6 +52,7 @@ public class customHandler extends BroadcastReceiver
             //Start lanuch Activity
             String packageName = context.getPackageName();
             Intent resultIntent = new Intent(context.getPackageManager().getLaunchIntentForPackage(packageName));
+            //Intent resultIntent = new Intent(context, SocketActivity.class);
             resultIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK| Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
             resultIntent.putExtras(intent.getBundleExtra("pushData"));
@@ -56,7 +62,23 @@ public class customHandler extends BroadcastReceiver
         }else if(action.equals(PBConstants.EVENT_MSG_RECEIVE)){
             HashMap<?, ?> PushdataOpen = (HashMap<?, ?>) intent.getExtras().get(PBConstants.EVENT_MSG_RECEIVE);
             Log.i(TAG, "User Received notification with Message: " + PushdataOpen.get("message"));
+            String sender = (String) PushdataOpen.get("sender");
+            String receiver = (String) PushdataOpen.get("receiver");
+            String content = (String) PushdataOpen.get("message");
+            boolean isPhoto;
+            if(PushdataOpen.get("isPhoto").equals("true")){
+                isPhoto = true;
+            }else{
+                isPhoto = false;
+            }
+            Log.i(TAG, "CustomFields: " + sender + " " + receiver + " " + content + " " + isPhoto);
+            RealmMessages realmMessages = new RealmMessages(sender, receiver, content, false, isPhoto, new Date());
             // Add the message received to the local db
+            Realm realm = Realm.getInstance(context);
+            realm.beginTransaction();
+            realm.copyToRealm(realmMessages);
+            realm.commitTransaction();
+
         }
     }
 }

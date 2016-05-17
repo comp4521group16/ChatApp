@@ -47,6 +47,7 @@ public class SocketActivity extends AppCompatActivity {
     private static final int RESULT_LOAD_IMAGE = 1;
     private static final int REQUEST_CAMERA = 10;
     static final int REQUEST_TAKE_PHOTO = 2;
+    static final String CHAT_FRAGMENT_TAG = "ChatFragment";
     private Realm realm;
     private RealmConfiguration realmConfig;
     public static Handler mHandler;
@@ -70,7 +71,7 @@ public class SocketActivity extends AppCompatActivity {
         if (frameLayout != null) {
             if (goChatRoomDirectly){
                 ChatFragment chatFragment = ChatFragment.newInstance(receiver);
-                getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, chatFragment).commit();
+                getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, chatFragment, CHAT_FRAGMENT_TAG).commit();
             } else {
                 ConversationListFragment conversationListFragment = new ConversationListFragment();
                 getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, conversationListFragment).commit();
@@ -175,7 +176,7 @@ public class SocketActivity extends AppCompatActivity {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
                 // Thumbnail image
                 Bitmap minibm = ThumbnailUtils.extractThumbnail(bitmap, 640, 480);
-                ChatFragment fragment = (ChatFragment) getSupportFragmentManager().findFragmentById(R.id.chat);
+                ChatFragment fragment = (ChatFragment) getSupportFragmentManager().findFragmentByTag(CHAT_FRAGMENT_TAG);
                 fragment.sendImage(bitmap);
 
             } catch (Exception e) {
@@ -195,8 +196,12 @@ public class SocketActivity extends AppCompatActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            ChatFragment fragment = (ChatFragment) getSupportFragmentManager().findFragmentById(R.id.chat);
+            ChatFragment fragment = (ChatFragment) getSupportFragmentManager().findFragmentByTag(CHAT_FRAGMENT_TAG);
+            if(fragment == null){
+                Log.i(TAG, "Fragment is null");
+            }
             fragment.sendImage(ThumbnailUtils.extractThumbnail(rotatedbm, 640, 480));
+
         }
 
     }

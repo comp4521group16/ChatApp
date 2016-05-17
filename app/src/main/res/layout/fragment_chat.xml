@@ -1,10 +1,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/chat"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-              android:id="@+id/chat"
     tools:context="com.example.kalongip.chatapp.ChatFragment">
 
     <android.support.v7.widget.RecyclerView
@@ -14,16 +14,17 @@
         android:layout_weight="1"
         android:paddingLeft="8dp"
         android:paddingRight="8dp"
+        android:scrollbarStyle="outsideOverlay"
         android:scrollbars="vertical"
-        app:stackFromEnd="true"
-        android:scrollbarStyle="outsideOverlay"/>
+        app:stackFromEnd="true" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingLeft="2dp"
-        android:paddingRight="2dp"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:paddingLeft="2dp"
+        android:paddingRight="2dp">
 
         <EditText
             android:id="@+id/message_input"
@@ -34,14 +35,15 @@
             android:imeActionId="@+id/send"
             android:imeActionLabel="@string/action_send"
             android:imeOptions="actionSend"
-            android:maxEms="10"
-            android:inputType="textMultiLine" />
+            android:inputType="textMultiLine"
+            android:maxEms="10" />
+
         <ImageButton
             android:id="@+id/send_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@android:drawable/ic_menu_send"
-            android:contentDescription="@string/action_send"/>
+            android:contentDescription="@string/action_send"
+            android:src="@android:drawable/ic_menu_send" />
 
     </LinearLayout>
 </LinearLayout>

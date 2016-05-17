@@ -37,6 +37,7 @@ public class ConversationListAdapter extends RecyclerView.Adapter<ConversationLi
 
     private List<RealmMessages> messages = new ArrayList<>(); // A List of messages passed from ConversationListFragment
     private Context context;
+    static final String CHAT_FRAGMENT_TAG = "ChatFragment";
     private boolean isSearch;
     private Realm realm;
 
@@ -68,7 +69,7 @@ public class ConversationListAdapter extends RecyclerView.Adapter<ConversationLi
                     ChatFragment chatFragment = ChatFragment.newInstance(receiver);
                     FragmentManager fm = ((AppCompatActivity) context).getSupportFragmentManager();
                     FragmentTransaction ft = fm.beginTransaction();
-                    ft.replace(R.id.fragment_container, chatFragment);
+                    ft.replace(R.id.fragment_container, chatFragment, CHAT_FRAGMENT_TAG);
                     ft.addToBackStack(null).commit();
                 } else {
                     //update friendlist in sharepref
