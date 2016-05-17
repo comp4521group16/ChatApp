@@ -51,8 +51,8 @@ public class customHandler extends BroadcastReceiver
 
             //Start lanuch Activity
             String packageName = context.getPackageName();
-            //Intent resultIntent = new Intent(context.getPackageManager().getLaunchIntentForPackage(packageName));
-            Intent resultIntent = new Intent(context, SocketActivity.class);
+            Intent resultIntent = new Intent(context.getPackageManager().getLaunchIntentForPackage(packageName));
+            //Intent resultIntent = new Intent(context, SocketActivity.class);
             resultIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK| Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
             resultIntent.putExtras(intent.getBundleExtra("pushData"));
@@ -64,7 +64,7 @@ public class customHandler extends BroadcastReceiver
             Log.i(TAG, "User Received notification with Message: " + PushdataOpen.get("message"));
             String sender = (String) PushdataOpen.get("sender");
             String receiver = (String) PushdataOpen.get("receiver");
-            String content = (String) PushdataOpen.get("content");
+            String content = (String) PushdataOpen.get("message");
             boolean isPhoto;
             if(PushdataOpen.get("isPhoto").equals("true")){
                 isPhoto = true;

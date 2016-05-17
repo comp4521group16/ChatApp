@@ -1,6 +1,7 @@
 package com.example.kalongip.chatapp;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.example.kalongip.chatapp.Model.RealmMessages;
 
@@ -12,14 +13,16 @@ import io.realm.RealmResults;
  */
 public class RealmQuery {
     Realm realm;
-
+    private static final String TAG = "RealmQuery";
     public RealmQuery(Context context){
         realm = Realm.getInstance(context);
     }
 
     public RealmResults<RealmMessages> retrieveChatHistoryByUserName(String friend){
-        return realm.where(RealmMessages.class).beginGroup()
+        Log.i(TAG, "Query Name: " + friend);
+        RealmResults<RealmMessages> realmResults = realm.where(RealmMessages.class).beginGroup()
                 .equalTo("sender", friend).or().equalTo("receiver", friend).endGroup().findAll();
+        return realmResults;
     }
 
 }

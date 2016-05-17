@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import com.example.kalongip.chatapp.Callbacks.ImageEncodeCallback;
 import com.example.kalongip.chatapp.Model.RealmMessages;
@@ -35,6 +36,7 @@ import java.util.Date;
 import java.util.List;
 
 import io.realm.Realm;
+import io.realm.RealmResults;
 
 
 /**
@@ -101,10 +103,27 @@ public class ChatFragment extends Fragment {
             });
         }
     };
+    /**
+     * Handler to handle the case that the connection to socket is not established
+     */
+    private Emitter.Listener handleConnectionError = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            Log.i(TAG, "Cannot connect to socket");
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    // Prompt the user of not connecting to the socket
+                    Toast.makeText(getContext(), "Error connecting socket......", Toast.LENGTH_LONG).show();
 
+                }
+            });
+        }
+    };
     {
         try {
             socket = IO.socket("http://192.168.1.60:3000");
+            socket.on("connect_error", handleConnectionError);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
@@ -135,12 +154,14 @@ public class ChatFragment extends Fragment {
         socket.on("message", handleIncomingMessages);
         cache = new Cache(getContext());
         user = cache.getUser();
+        initializeChatHistory(receiverName);
         ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(receiverName);
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        Log.i(TAG, "onResume()");
         joinSocket();
     }
 
@@ -184,9 +205,7 @@ public class ChatFragment extends Fragment {
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         // mAdapter = new MessageAdapter(mMessages);
-        messages = new RealmQuery(getContext()).retrieveChatHistoryByUserName(receiverName);
         mAdapter = new MessageAdapter(messages);
-        mAdapter.notifyDataSetChanged();
 //        if (context instanceof OnFragmentInteractionListener) {
 //            mListener = (OnFragmentInteractionListener) context;
 //        } else {
@@ -215,6 +234,7 @@ public class ChatFragment extends Fragment {
     }
 
     private void sendMessage() {
+        Log.i(TAG, "sendMessage");
         String message = mInputMessageView.getText().toString().trim();
         mInputMessageView.setText("");
         addMessage(message, true);
@@ -304,6 +324,20 @@ public class ChatFragment extends Fragment {
 
     }
 
+    /**
+     * This class loads all the related chat history from local database and show it on screen
+     */
+    private void initializeChatHistory(String name){
+        // Query to retrieve the chat history involving the user and his friend
+        RealmResults<RealmMessages> realmResults = new RealmQuery(getContext()).retrieveChatHistoryByUserName(name);
+        for (int i = 0; i < realmResults.size(); i++) {
+            messages.add(realmResults.get(i));
+        }
+        mAdapter = new MessageAdapter(messages);
+        Log.i(TAG, "Initializing chat history" + " " +realmResults.size());
+        mAdapter.notifyDataSetChanged();
+    }
+
     private void scrollToBottom() {
         mMessagesView.scrollToPosition(mAdapter.getItemCount() - 1);
     }
@@ -328,6 +362,7 @@ public class ChatFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         socket.disconnect();
+        Log.i(TAG,"onDestroy()");
     }
 
     /**
