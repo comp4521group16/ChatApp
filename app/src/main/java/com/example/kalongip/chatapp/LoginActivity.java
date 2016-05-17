@@ -223,7 +223,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                             User user = dataSnapshot.getValue(User.class);
                             Log.d(TAG, "Login by :" + user.toString());
                             cache = new Cache(getApplicationContext());
-                            User newUser = new User(user.getEmail(), user.getUsername(), user.getUid());
+                            User newUser = new User(user.getEmail(), user.getUid(), user.getUsername(), user.getFriends());
                             cache.setUser(newUser);
                             cache.setLoggedIn(true);
                             Pushbots.sharedInstance().setAlias(user.getUsername());

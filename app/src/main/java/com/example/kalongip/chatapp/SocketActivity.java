@@ -6,20 +6,22 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
-import android.os.*;
+import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.FrameLayout;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 
@@ -40,6 +42,8 @@ import io.realm.RealmConfiguration;
 
 public class SocketActivity extends AppCompatActivity {
 
+    private static final String TAG = SocketActivity.class.getSimpleName();
+
     private static final int RESULT_LOAD_IMAGE = 1;
     private static final int REQUEST_CAMERA = 10;
     static final int REQUEST_TAKE_PHOTO = 2;
@@ -49,15 +53,28 @@ public class SocketActivity extends AppCompatActivity {
     private String mCurrentPhotoPath=null;
     PopupWindow popupWindow;
 
+    private String receiver;
+    private boolean goChatRoomDirectly;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_socket);
+        Intent intent = getIntent();
+        receiver = intent.getStringExtra("receiver");
+        goChatRoomDirectly = intent.getBooleanExtra("goChatRoomDirectly", false);
+        Log.d(TAG, "receiver = " + receiver);
+        Log.d(TAG, "goChatRoomDirectly = " + goChatRoomDirectly);
 
         FrameLayout frameLayout = (FrameLayout) findViewById(R.id.fragment_container);
         if (frameLayout != null) {
-            ConversationListFragment conversationListFragment = new ConversationListFragment();
-            getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, conversationListFragment).commit();
+            if (goChatRoomDirectly){
+                ChatFragment chatFragment = ChatFragment.newInstance(receiver);
+                getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, chatFragment).commit();
+            } else {
+                ConversationListFragment conversationListFragment = new ConversationListFragment();
+                getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, conversationListFragment).commit();
+            }
         }
         // Create the Realm configuration
         realmConfig = new RealmConfiguration.Builder(this).build();
@@ -120,6 +137,10 @@ public class SocketActivity extends AppCompatActivity {
             cache.setLoggedIn(false);
             cache.clearUser();
             finish();
+            startActivity(intent);
+        }
+        else if (id == R.id.action_search){
+            Intent intent = new Intent(getApplicationContext(), SearchActivity.class);
             startActivity(intent);
         }
         return super.onOptionsItemSelected(item);

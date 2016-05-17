@@ -14,6 +14,8 @@ import com.example.kalongip.chatapp.Value.Const;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class RegisterActivity extends AppCompatActivity {
@@ -24,6 +26,8 @@ public class RegisterActivity extends AppCompatActivity {
     private AutoCompleteTextView newUsername;
     private EditText newPassword;
     private EditText confirmPassword;
+
+    private List<String> friends = new ArrayList<>();
 
     @Override
     public void onBackPressed() {
@@ -98,6 +102,8 @@ public class RegisterActivity extends AppCompatActivity {
                     userRef.child("email").setValue(email);
                     userRef.child("username").setValue(username);
                     userRef.child("uid").setValue(result.get("uid"));
+                    friends.add("test");
+                    userRef.child("friends").setValue(friends);
                     finish();
                 }
                 @Override
