@@ -90,6 +90,7 @@ public class ConversationListFragment extends Fragment{
                                 Date date = new Date();
                                 RealmMessages msg = new RealmMessages(user.getUsername(), users.getUsername(), "hello", true, true, date);
                                 messages.add(msg);
+                                adapter.notifyDataSetChanged();
                             }
                         }
 
@@ -104,6 +105,7 @@ public class ConversationListFragment extends Fragment{
                         Date date = new Date();
                         RealmMessages msg = new RealmMessages(user.getUsername(), users.getUsername(), "hello", true, true, date);
                         messages.add(msg);
+                        adapter.notifyDataSetChanged();
                     }
                 }
             }
