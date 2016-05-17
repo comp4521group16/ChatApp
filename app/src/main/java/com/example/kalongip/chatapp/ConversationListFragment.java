@@ -101,11 +101,7 @@ public class ConversationListFragment extends Fragment{
 
                 }
             });
-        } else {
-
         }
-
-
     }
 
     @Nullable
@@ -130,6 +126,7 @@ public class ConversationListFragment extends Fragment{
         super.onResume();
         //Call from SocketActivity
         if (searchName == null) {
+            Log.d(TAG, "Friend list called!");
             messages.clear();
             realm = Realm.getInstance(getContext());
             RealmQuery query = new RealmQuery(getContext());
@@ -137,8 +134,8 @@ public class ConversationListFragment extends Fragment{
             for (RealmFriendList fd: results){
                 RealmMessages msg = new RealmMessages(user.getUsername(), fd.getaFriend(), "last msg", false, false, date);
                 messages.add(msg);
+                adapter.notifyDataSetChanged();
             }
-            adapter.notifyDataSetChanged();
         }
     }
 }
