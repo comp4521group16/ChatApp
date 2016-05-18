@@ -29,16 +29,14 @@ public class Cache {
         prefs.edit().putString("Email", email).apply();
         prefs.edit().putString("UserName", username).apply();
         prefs.edit().putString("UID", uid).apply();
-//        Set<String> set = new HashSet<String>();
-//        set.addAll(friends);
-//        prefs.edit().putStringSet("FriendList", set);
-        prefs.edit().putInt("FriendListSize", friends.size());
+        prefs.edit().putInt("FriendListSize", friends.size()).apply();
+        Log.d(TAG, "Fd list size: " + friends.size());
         for (int i = 0; i < friends.size(); i++){
             String key = "friend" + i;
             String fd = friends.get(i);
             prefs.edit().putString(key, fd).apply();
         }
-        Log.d(TAG, "Set fd list: " + friends);
+        Log.d(TAG, "Set fd list of " + username + ": " + friends);
     }
 
     public User getUser() {
@@ -47,15 +45,15 @@ public class Cache {
         String username =  prefs.getString("UserName", null);
         String uid = prefs.getString("UID", null);
         int length = prefs.getInt("FriendListSize", 0);
+        Log.d(TAG, "Fd list size: " + length);
         List<String> friends = new ArrayList<String>();
         for (int i = 0; i < length; i++){
             String key = "friend" + i;
             String fd = prefs.getString(key, null);
-            friends.add(i, fd);
+            Log.d(TAG, "Get a fd: " + fd);
+            friends.add(fd);
         }
-//        Set<String> set = prefs.getStringSet("FriendList", null);
-//        List<String> friends = (List<String>) set;
-        Log.d(TAG, "Set fd list: " + friends);
+        Log.d(TAG, "Get fd list of " + username + ": " + friends);
         User result = new User(email, uid, username, friends);
         return result;
     }

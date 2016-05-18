@@ -7,6 +7,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,7 +24,9 @@ import com.example.kalongip.chatapp.Value.Cache;
 import com.example.kalongip.chatapp.Value.Const;
 import com.firebase.client.Firebase;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import io.realm.Realm;
@@ -55,16 +58,20 @@ public class ConversationListAdapter extends RecyclerView.Adapter<ConversationLi
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        holder.receiver.setText(messages.get(position).getReceiver());
-        holder.content.setText(messages.get(position).getContent());
-//        holder.date.setText(messages.get(position).getDate().toString());
-        holder.date.setText("1/1/2011");
+        final String receiver = messages.get(position).getReceiver();
+        String content = messages.get(position).getContent();
+        Date date = messages.get(position).getDate();
 
+        SimpleDateFormat sdFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+        String dateString = sdFormat.format(date);
+
+        holder.receiver.setText(receiver);
+        holder.content.setText(content);
+        holder.date.setText(dateString);
         holder.card.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //TODO set OnClick
-                String receiver = (String) holder.receiver.getText();
                 if (!isSearch){
                     ChatFragment chatFragment = ChatFragment.newInstance(receiver);
                     FragmentManager fm = ((AppCompatActivity) context).getSupportFragmentManager();
@@ -72,15 +79,6 @@ public class ConversationListAdapter extends RecyclerView.Adapter<ConversationLi
                     ft.replace(R.id.fragment_container, chatFragment, CHAT_FRAGMENT_TAG);
                     ft.addToBackStack(null).commit();
                 } else {
-                    //update friendlist in sharepref
-                    Cache cache = new Cache(context);
-                    User user = cache.getUser();
-//                    Log.d(TAG, "Add friend by the user:" + user.toString());
-//                    List<String> friends = user.getFriends();
-//                    friends.add(receiver);
-//                    user.setFriends(friends);
-//                    cache.setUser(user);
-
                     //Get the current fdlist from realm
                     List<String> friends= new ArrayList<>();
                     RealmQuery query = new RealmQuery(context);
@@ -88,6 +86,7 @@ public class ConversationListAdapter extends RecyclerView.Adapter<ConversationLi
                     for (RealmFriendList fd: friendList) {
                         friends.add(fd.getaFriend());
                     }
+
                     //Add a new fd to realm
                     RealmFriendList fd = new RealmFriendList(friends.size(), receiver);
                     realm = Realm.getInstance(context);
@@ -96,6 +95,14 @@ public class ConversationListAdapter extends RecyclerView.Adapter<ConversationLi
                     realm.commitTransaction();
 
                     friends.add(receiver);
+
+                    //update friendlist in sharepref
+                    Cache cache = new Cache(context);
+                    User user = cache.getUser();
+                    Log.d(TAG, "Add friend by the user:" + user.toString());
+                    user.setFriends(friends);
+                    cache.setUser(user);
+
                     //update friendlist in firebase
                     Firebase ref = new Firebase(Const.FIREBASE_URL + "/users");
                     ref.child("/" + user.getUid()).child("friends").setValue(friends);

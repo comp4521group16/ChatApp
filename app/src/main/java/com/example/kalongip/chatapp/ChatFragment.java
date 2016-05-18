@@ -110,14 +110,16 @@ public class ChatFragment extends Fragment {
         @Override
         public void call(Object... args) {
             Log.i(TAG, "Cannot connect to socket");
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    // Prompt the user of not connecting to the socket
-                    Toast.makeText(getContext(), "Error connecting socket......", Toast.LENGTH_LONG).show();
+            if (getActivity() != null){
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        // Prompt the user of not connecting to the socket
+                        Toast.makeText(getContext(), "Error connecting socket......", Toast.LENGTH_LONG).show();
 
-                }
-            });
+                    }
+                });
+            }
         }
     };
     {
@@ -346,6 +348,7 @@ public class ChatFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle("Texter");
     }
 
     public interface OnFragmentInteractionListener {

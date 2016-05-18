@@ -10,8 +10,8 @@
     android:layout_marginRight="8dp"
     android:layout_marginTop="2dp"
     android:theme="@style/AppTheme"
-    card_view:cardElevation="2dp"
-    card_view:cardUseCompatPadding="true">
+    card_view:cardElevation="2dp">
+    <!--card_view:cardUseCompatPadding="true">-->
 
     <LinearLayout
         android:layout_width="match_parent"

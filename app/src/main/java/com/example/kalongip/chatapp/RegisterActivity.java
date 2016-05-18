@@ -73,6 +73,12 @@ public class RegisterActivity extends AppCompatActivity {
             cancel = true;
         }
 
+        if (!isPasswordValid(password)) {
+            newPassword.setError(getString(R.string.error_invalid_password));
+            focusView = newPassword;
+            cancel = true;
+        }
+
         if (TextUtils.isEmpty(username)){
             newUsername.setError("This field is required");
             focusView = newUsername;
@@ -102,7 +108,7 @@ public class RegisterActivity extends AppCompatActivity {
                     userRef.child("email").setValue(email);
                     userRef.child("username").setValue(username);
                     userRef.child("uid").setValue(result.get("uid"));
-                    friends.add("Welcome to Texter!");
+//                    friends.add("Welcome to Texter!");
                     userRef.child("friends").setValue(friends);
                     finish();
                 }
@@ -121,5 +127,10 @@ public class RegisterActivity extends AppCompatActivity {
         java.util.regex.Pattern p = java.util.regex.Pattern.compile(ePattern);
         java.util.regex.Matcher m = p.matcher(email);
         return m.matches();
+    }
+
+    private boolean isPasswordValid(String password) {
+        //TODO: Replace this with your own logic
+        return password.length() > 4;
     }
 }

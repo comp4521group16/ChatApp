@@ -197,13 +197,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         boolean cancel = false;
         View focusView = null;
 
-        // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
-            mPasswordView.setError(getString(R.string.error_invalid_password));
-            focusView = mPasswordView;
-            cancel = true;
-        }
-
         // Check for a valid email address.
         if (TextUtils.isEmpty(email)) {
             mEmailView.setError(getString(R.string.error_field_required));
@@ -250,11 +243,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                             realm.commitTransaction();
 
                             cache = new Cache(getApplicationContext());
-                            User newUser = new User(user.getEmail(), user.getUid(), user.getUsername(), user.getFriends());
-                            cache.setUser(newUser);
+                            cache.setUser(user);
                             cache.setLoggedIn(true);
                             Pushbots.sharedInstance().setAlias(user.getUsername());
 
+                            Intent intent = new Intent(getApplicationContext(), SocketActivity.class);
+                            finish();
+                            startActivity(intent);
                         }
 
                         @Override
@@ -262,9 +257,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
                         }
                     });
-                    Intent intent = new Intent(getApplicationContext(), SocketActivity.class);
-                    finish();
-                    startActivity(intent);
+
                 }
 
                 @Override
@@ -279,13 +272,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
     private boolean isEmailValid(String email) {
-        //TODO: Replace this with your own logic
-        return email != null;
-    }
-
-    private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
-        return password.length() > 4;
+        String ePattern = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$";
+        java.util.regex.Pattern p = java.util.regex.Pattern.compile(ePattern);
+        java.util.regex.Matcher m = p.matcher(email);
+        return m.matches();
     }
 
     /**

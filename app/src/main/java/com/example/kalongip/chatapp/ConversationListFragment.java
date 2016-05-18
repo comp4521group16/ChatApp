@@ -90,7 +90,7 @@ public class ConversationListFragment extends Fragment{
                     messages.clear();
                     for (DataSnapshot snapshot: dataSnapshot.getChildren()){
                         User users = snapshot.getValue(User.class);
-                        RealmMessages msg = new RealmMessages(user.getUsername(), users.getUsername(), "hello", true, true, date);
+                        RealmMessages msg = new RealmMessages(user.getUsername(), users.getUsername(), "Click on me to chat!", true, false, date);
                         messages.add(msg);
                         adapter.notifyDataSetChanged();
                     }
@@ -132,8 +132,19 @@ public class ConversationListFragment extends Fragment{
             RealmQuery query = new RealmQuery(getContext());
             RealmResults<RealmFriendList> results = query.retrieveFriendList();
             for (RealmFriendList fd: results){
-                RealmMessages msg = new RealmMessages(user.getUsername(), fd.getaFriend(), "last msg", false, false, date);
-                messages.add(msg);
+                String receiver = fd.getaFriend();
+                RealmResults<RealmMessages> realmResults = new RealmQuery(getContext()).retrieveChatHistoryByUserName(receiver);
+                if (realmResults.size() > 0){
+                    String content = realmResults.last().getContent();
+                    boolean fromMe = realmResults.last().isFromMe();
+                    boolean isPhoto = realmResults.last().isPhoto();
+                    Date date = realmResults.last().getDate();
+                    RealmMessages msg = new RealmMessages(user.getUsername(), receiver, content, fromMe, isPhoto, date);
+                    messages.add(msg);
+                }else {
+                    RealmMessages msg = new RealmMessages(user.getUsername(), receiver, "No history!", true, false, date);
+                    messages.add(msg);
+                }
                 adapter.notifyDataSetChanged();
             }
         }

@@ -19,6 +19,12 @@ public class RealmQuery {
         realm = Realm.getInstance(context);
     }
 
+    public RealmResults<RealmMessages> retrieveLastMsg(String friend){
+        RealmResults<RealmMessages> realmResults = realm.where(RealmMessages.class).beginGroup().
+            equalTo("sender", friend).or().equalTo("receiver", friend).endGroup().findAllSorted("Date");
+        return realmResults;
+    }
+
     public RealmResults<RealmMessages> retrieveChatHistoryByUserName(String friend){
         Log.i(TAG, "Query Name: " + friend);
         RealmResults<RealmMessages> realmResults = realm.where(RealmMessages.class).beginGroup()
