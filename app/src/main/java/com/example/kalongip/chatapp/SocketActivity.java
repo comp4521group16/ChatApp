@@ -40,7 +40,7 @@ import io.realm.Realm;
 import io.realm.RealmConfiguration;
 
 
-public class SocketActivity extends AppCompatActivity {
+public class SocketActivity extends AppCompatActivity implements ChatFragment.OnFragmentInteractionListener {
 
     private static final String TAG = SocketActivity.class.getSimpleName();
 
@@ -51,8 +51,9 @@ public class SocketActivity extends AppCompatActivity {
     private Realm realm;
     private RealmConfiguration realmConfig;
     public static Handler mHandler;
-    private String mCurrentPhotoPath=null;
+    private String mCurrentPhotoPath = null;
     PopupWindow popupWindow;
+    boolean notConnected = false;
 
     private String receiver;
     private boolean goChatRoomDirectly;
@@ -69,7 +70,7 @@ public class SocketActivity extends AppCompatActivity {
 
         FrameLayout frameLayout = (FrameLayout) findViewById(R.id.fragment_container);
         if (frameLayout != null) {
-            if (goChatRoomDirectly){
+            if (goChatRoomDirectly) {
                 ChatFragment chatFragment = ChatFragment.newInstance(receiver);
                 getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, chatFragment, CHAT_FRAGMENT_TAG).commit();
             } else {
@@ -81,10 +82,10 @@ public class SocketActivity extends AppCompatActivity {
         realmConfig = new RealmConfiguration.Builder(this).build();
         // Open the Realm for the UI thread.
         realm = Realm.getInstance(realmConfig);
-        mHandler = new Handler(){
+        mHandler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
-                switch(msg.what){
+                switch (msg.what) {
                     case 1: // Showing the image in full screen
                         RelativeLayout relativeLayout = (RelativeLayout) findViewById(R.id.container);
                         LayoutInflater layoutInflater = (LayoutInflater) getApplicationContext().getSystemService(LAYOUT_INFLATER_SERVICE);
@@ -122,16 +123,20 @@ public class SocketActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.action_settings){
+        if (id == R.id.action_settings) {
             return true;
-        }else if (id == R.id.action_camera){
+        } else if (id == R.id.action_camera) {
             // open the camera app
             //openCamera();
-            dispatchTakePictureIntent();
-        }else if (id == R.id.action_gallery){
+            if (notConnected == false)
+                dispatchTakePictureIntent();
+        } else if (id == R.id.action_gallery) {
             // open the gallery to choose photo
-            openGallery();
-        }else if (id == R.id.action_logout){
+            if (notConnected == false){
+                openGallery();
+            }
+
+        } else if (id == R.id.action_logout) {
             // logout
             Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
             Cache cache = new Cache(getApplicationContext());
@@ -139,8 +144,7 @@ public class SocketActivity extends AppCompatActivity {
             cache.clearUser();
             finish();
             startActivity(intent);
-        }
-        else if (id == R.id.action_search){
+        } else if (id == R.id.action_search) {
             Intent intent = new Intent(getApplicationContext(), SearchActivity.class);
             startActivity(intent);
         }
@@ -156,7 +160,7 @@ public class SocketActivity extends AppCompatActivity {
         startActivityForResult(new Intent(MediaStore.ACTION_IMAGE_CAPTURE), REQUEST_CAMERA);
     }
 
-    private void openGallery(){
+    private void openGallery() {
         startActivityForResult(Intent.createChooser(new Intent().setType("image/*")
                 .setAction(Intent.ACTION_GET_CONTENT), "Select Picture"), RESULT_LOAD_IMAGE);
     }
@@ -187,9 +191,9 @@ public class SocketActivity extends AppCompatActivity {
             // Image captured
             Bitmap bitmap = null;
             Bitmap rotatedbm = null;
-            try ( InputStream is = new URL( mCurrentPhotoPath ).openStream() ) {
-                 bitmap = BitmapFactory.decodeStream(is);
-                 //minibm = ThumbnailUtils.extractThumbnail(bitmap, 640, 480);
+            try (InputStream is = new URL(mCurrentPhotoPath).openStream()) {
+                bitmap = BitmapFactory.decodeStream(is);
+                //minibm = ThumbnailUtils.extractThumbnail(bitmap, 640, 480);
                 rotatedbm = BitmapRotate.rotate(bitmap, 90);
             } catch (MalformedURLException e) {
                 e.printStackTrace();
@@ -197,7 +201,7 @@ public class SocketActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
             ChatFragment fragment = (ChatFragment) getSupportFragmentManager().findFragmentByTag(CHAT_FRAGMENT_TAG);
-            if(fragment == null){
+            if (fragment == null) {
                 Log.i(TAG, "Fragment is null");
             }
             fragment.sendImage(ThumbnailUtils.extractThumbnail(rotatedbm, 640, 480));
@@ -243,4 +247,9 @@ public class SocketActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onFragmentInteraction(boolean result) {
+        Log.i(TAG, "Callback: " + result);
+        notConnected = result;
+    }
 }

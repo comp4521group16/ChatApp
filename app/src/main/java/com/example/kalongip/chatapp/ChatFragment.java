@@ -75,7 +75,6 @@ public class ChatFragment extends Fragment {
     private Socket socket;
     private Cache cache;
     private User user;
-    boolean notConnected = false;
 
     private Emitter.Listener handleIncomingMessages = new Emitter.Listener() {
         @Override
@@ -120,7 +119,7 @@ public class ChatFragment extends Fragment {
                     @Override
                     public void run() {
                         disableSending();
-                        notConnected = true;
+                        mListener.onFragmentInteraction(true);
                         // Prompt the user of not connecting to the socket
                         Toast.makeText(getContext(), "Error connecting socket......", Toast.LENGTH_LONG).show();
 
@@ -140,8 +139,8 @@ public class ChatFragment extends Fragment {
                 @Override
                 public void run() {
                     joinSocket();
+                    mListener.onFragmentInteraction(false);
                     enableSending();
-                    notConnected = false;
                 }
             });
         }
@@ -243,6 +242,7 @@ public class ChatFragment extends Fragment {
 //            throw new RuntimeException(context.toString()
 //                    + " must implement OnFragmentInteractionListener");
 //        }
+        mListener = (OnFragmentInteractionListener) activity;
     }
 
     @Override
@@ -396,7 +396,7 @@ public class ChatFragment extends Fragment {
     }
 
     public interface OnFragmentInteractionListener {
-        void onFragmentInteraction(Uri uri);
+        void onFragmentInteraction(boolean notConnected);
     }
 
     @Override
