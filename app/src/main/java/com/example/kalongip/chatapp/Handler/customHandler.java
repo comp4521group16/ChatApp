@@ -1,11 +1,17 @@
 package com.example.kalongip.chatapp.Handler;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.provider.Settings;
+import android.support.v4.app.TaskStackBuilder;
+import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
 import com.example.kalongip.chatapp.Model.RealmMessages;
+import com.example.kalongip.chatapp.R;
 import com.example.kalongip.chatapp.SocketActivity;
 import com.pushbots.push.PBNotificationIntent;
 import com.pushbots.push.Pushbots;
@@ -49,15 +55,16 @@ public class customHandler extends BroadcastReceiver
                 Pushbots.sharedInstance().reportPushOpened( (String) PushdataOpen.get("PUSHANALYTICS"));
             }
 
-            //Start lanuch Activity
+            //Start launch Activity
             String packageName = context.getPackageName();
             //Intent resultIntent = new Intent(context.getPackageManager().getLaunchIntentForPackage(packageName));
             Intent resultIntent = new Intent(context, SocketActivity.class);
-            resultIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK| Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            resultIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             resultIntent.putExtra("goChatRoomDirectly", true);
             resultIntent.putExtra("receiver", PushdataOpen.get("receiver").toString());
             resultIntent.putExtras(intent.getBundleExtra("pushData"));
             Pushbots.sharedInstance().startActivity(resultIntent);
+
 
             // Handle Push Message when received
         }else if(action.equals(PBConstants.EVENT_MSG_RECEIVE)){
