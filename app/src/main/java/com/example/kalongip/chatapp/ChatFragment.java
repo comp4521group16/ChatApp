@@ -12,6 +12,9 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -72,6 +75,7 @@ public class ChatFragment extends Fragment {
     private Socket socket;
     private Cache cache;
     private User user;
+    boolean notConnected = false;
 
     private Emitter.Listener handleIncomingMessages = new Emitter.Listener() {
         @Override
@@ -111,11 +115,12 @@ public class ChatFragment extends Fragment {
         @Override
         public void call(Object... args) {
             Log.i(TAG, "Cannot connect to socket");
-            if (getActivity() != null){
+            if (getActivity() != null) {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         disableSending();
+                        notConnected = true;
                         // Prompt the user of not connecting to the socket
                         Toast.makeText(getContext(), "Error connecting socket......", Toast.LENGTH_LONG).show();
 
@@ -128,7 +133,7 @@ public class ChatFragment extends Fragment {
     private Emitter.Listener handleRegistration = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            if(getActivity() == null){
+            if (getActivity() == null) {
                 return;
             }
             getActivity().runOnUiThread(new Runnable() {
@@ -136,10 +141,12 @@ public class ChatFragment extends Fragment {
                 public void run() {
                     joinSocket();
                     enableSending();
+                    notConnected = false;
                 }
             });
         }
     };
+
     {
         try {
             socket = IO.socket("http://192.168.1.60:3000");
@@ -176,14 +183,15 @@ public class ChatFragment extends Fragment {
         cache = new Cache(getContext());
         user = cache.getUser();
         initializeChatHistory(receiverName);
-        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(receiverName);
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(receiverName);
+
     }
 
     @Override
     public void onResume() {
         super.onResume();
         Log.i(TAG, "onResume()");
-       // joinSocket();
+        // joinSocket();
     }
 
     /**
@@ -255,19 +263,22 @@ public class ChatFragment extends Fragment {
                 sendMessage();
             }
         });
+        scrollToBottom();
     }
 
-    private void disableSending(){
-        if(imageButton!=null){
+
+    private void disableSending() {
+        if (imageButton != null) {
             imageButton.setEnabled(false);
         }
     }
 
-    private void enableSending(){
-        if(imageButton!=null){
+    private void enableSending() {
+        if (imageButton != null) {
             imageButton.setEnabled(true);
         }
     }
+
     private void sendMessage() {
         Log.i(TAG, "sendMessage");
         String message = mInputMessageView.getText().toString().trim();
@@ -292,7 +303,7 @@ public class ChatFragment extends Fragment {
             Log.i(TAG, "A text message sent to " + receiverName);
             realmMessages = new RealmMessages(user.getUsername(), receiverName, message, fromME, false, new Date());
         } else {
-            Log.i(TAG, "A text message received from "+ receiverName);
+            Log.i(TAG, "A text message received from " + receiverName);
             realmMessages = new RealmMessages(receiverName, user.getUsername(), message, fromME, false, new Date());
         }
         storeToLocalDB(realmMessages);
@@ -313,11 +324,11 @@ public class ChatFragment extends Fragment {
     private void addImage(String imageString, boolean fromME) {
         //       mMessages.add(new Message.Builder(Message.TYPE_MESSAGE).image(bmp).build());
         RealmMessages realmMessages = null;
-        if(fromME){
+        if (fromME) {
             Log.i(TAG, "A photo sent to " + receiverName);
             realmMessages = new RealmMessages(user.getUsername(), receiverName, imageString, fromME, true, new Date());
-        }else {
-            Log.i(TAG, "A photo received from "+ receiverName);
+        } else {
+            Log.i(TAG, "A photo received from " + receiverName);
             realmMessages = new RealmMessages(receiverName, user.getUsername(), imageString, fromME, true, new Date());
         }
         storeToLocalDB(realmMessages);
@@ -362,14 +373,14 @@ public class ChatFragment extends Fragment {
     /**
      * This class loads all the related chat history from local database and show it on screen
      */
-    private void initializeChatHistory(String name){
+    private void initializeChatHistory(String name) {
         // Query to retrieve the chat history involving the user and his friend
         RealmResults<RealmMessages> realmResults = new RealmQuery(getContext()).retrieveChatHistoryByUserName(name);
         for (int i = 0; i < realmResults.size(); i++) {
             messages.add(realmResults.get(i));
         }
         mAdapter = new MessageAdapter(messages);
-        Log.i(TAG, "Initializing chat history" + " " +realmResults.size());
+        Log.i(TAG, "Initializing chat history" + " " + realmResults.size());
         mAdapter.notifyDataSetChanged();
     }
 
@@ -381,11 +392,19 @@ public class ChatFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
-        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle("Texter");
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Texter");
     }
 
     public interface OnFragmentInteractionListener {
         void onFragmentInteraction(Uri uri);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        menu.getItem(0).setVisible(false);
+        menu.getItem(3).setVisible(false);
+        menu.getItem(4).setVisible(false);
     }
 
     @Override
@@ -398,7 +417,7 @@ public class ChatFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         socket.disconnect();
-        Log.i(TAG,"onDestroy()");
+        Log.i(TAG, "onDestroy()");
     }
 
     /**

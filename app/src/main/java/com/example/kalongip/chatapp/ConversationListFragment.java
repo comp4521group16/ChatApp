@@ -8,6 +8,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -72,6 +74,7 @@ public class ConversationListFragment extends Fragment{
         if (bundle != null) {
             this.searchName = bundle.getString("search");
         }
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -158,5 +161,13 @@ public class ConversationListFragment extends Fragment{
                 adapter.notifyDataSetChanged();
             }
         }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        Log.i(TAG, "onCreateOptionsMenu");
+        menu.getItem(1).setVisible(false);
+        menu.getItem(2).setVisible(false);
     }
 }
