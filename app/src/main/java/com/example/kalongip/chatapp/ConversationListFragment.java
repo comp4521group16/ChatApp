@@ -101,11 +101,11 @@ public class ConversationListFragment extends Fragment{
                         for (DataSnapshot snapshot: dataSnapshot.getChildren()){
                             User users = snapshot.getValue(User.class);
                             RealmMessages msg = new RealmMessages(user.getUsername(), users.getUsername(), "Click on me to chat!", true, false, date);
-                            progressDialog.dismiss();
                             messages.add(msg);
                             adapter.notifyDataSetChanged();
                         }
                     }
+                    progressDialog.dismiss();
                 }
 
                 @Override
@@ -167,7 +167,9 @@ public class ConversationListFragment extends Fragment{
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         Log.i(TAG, "onCreateOptionsMenu");
-        menu.getItem(1).setVisible(false);
-        menu.getItem(2).setVisible(false);
+        if (getActivity() instanceof SocketActivity){
+            menu.getItem(1).setVisible(false);
+            menu.getItem(2).setVisible(false);
+        }
     }
 }
