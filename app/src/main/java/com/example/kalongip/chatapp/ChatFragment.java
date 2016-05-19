@@ -68,6 +68,7 @@ public class ChatFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
     private Realm realm;
 
+    private ImageButton imageButton = null;
     private Socket socket;
     private Cache cache;
     private User user;
@@ -114,6 +115,7 @@ public class ChatFragment extends Fragment {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        disableSending();
                         // Prompt the user of not connecting to the socket
                         Toast.makeText(getContext(), "Error connecting socket......", Toast.LENGTH_LONG).show();
 
@@ -122,9 +124,26 @@ public class ChatFragment extends Fragment {
             }
         }
     };
+
+    private Emitter.Listener handleRegistration = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            if(getActivity() == null){
+                return;
+            }
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    joinSocket();
+                    enableSending();
+                }
+            });
+        }
+    };
     {
         try {
             socket = IO.socket("http://192.168.1.60:3000");
+            socket.on("connect", handleRegistration);
             socket.on("connect_error", handleConnectionError);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
@@ -164,7 +183,7 @@ public class ChatFragment extends Fragment {
     public void onResume() {
         super.onResume();
         Log.i(TAG, "onResume()");
-        joinSocket();
+       // joinSocket();
     }
 
     /**
@@ -172,9 +191,11 @@ public class ChatFragment extends Fragment {
      * Called in onResume();
      */
     private void joinSocket() {
+        Log.i(TAG, "joinSocket");
         JSONObject username = new JSONObject();
         try {
             username.put("username", user.getUsername());
+            username.put("receiver", receiverName);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -225,6 +246,7 @@ public class ChatFragment extends Fragment {
         mMessagesView.setAdapter(mAdapter);
 
         ImageButton sendButton = (ImageButton) view.findViewById(R.id.send_button);
+        imageButton = sendButton;
         mInputMessageView = (EditText) view.findViewById(R.id.message_input);
 
         sendButton.setOnClickListener(new View.OnClickListener() {
@@ -235,6 +257,17 @@ public class ChatFragment extends Fragment {
         });
     }
 
+    private void disableSending(){
+        if(imageButton!=null){
+            imageButton.setEnabled(false);
+        }
+    }
+
+    private void enableSending(){
+        if(imageButton!=null){
+            imageButton.setEnabled(true);
+        }
+    }
     private void sendMessage() {
         Log.i(TAG, "sendMessage");
         String message = mInputMessageView.getText().toString().trim();

@@ -51,10 +51,11 @@ public class customHandler extends BroadcastReceiver
 
             //Start lanuch Activity
             String packageName = context.getPackageName();
-            Intent resultIntent = new Intent(context.getPackageManager().getLaunchIntentForPackage(packageName));
-            //Intent resultIntent = new Intent(context, SocketActivity.class);
+            //Intent resultIntent = new Intent(context.getPackageManager().getLaunchIntentForPackage(packageName));
+            Intent resultIntent = new Intent(context, SocketActivity.class);
             resultIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK| Intent.FLAG_ACTIVITY_CLEAR_TASK);
-
+            resultIntent.putExtra("goChatRoomDirectly", true);
+            resultIntent.putExtra("receiver", PushdataOpen.get("receiver").toString());
             resultIntent.putExtras(intent.getBundleExtra("pushData"));
             Pushbots.sharedInstance().startActivity(resultIntent);
 
@@ -66,13 +67,16 @@ public class customHandler extends BroadcastReceiver
             String receiver = (String) PushdataOpen.get("receiver");
             String content = (String) PushdataOpen.get("message");
             boolean isPhoto;
+            RealmMessages realmMessages = null;
             if(PushdataOpen.get("isPhoto").equals("true")){
                 isPhoto = true;
+                realmMessages = new RealmMessages(sender, receiver, content, false, isPhoto, new Date());
             }else{
                 isPhoto = false;
+                realmMessages = new RealmMessages(sender, receiver, content, false, isPhoto, new Date());
             }
             Log.i(TAG, "CustomFields: " + sender + " " + receiver + " " + content + " " + isPhoto);
-            RealmMessages realmMessages = new RealmMessages(sender, receiver, content, false, isPhoto, new Date());
+
             // Add the message received to the local db
             Realm realm = Realm.getInstance(context);
             realm.beginTransaction();
