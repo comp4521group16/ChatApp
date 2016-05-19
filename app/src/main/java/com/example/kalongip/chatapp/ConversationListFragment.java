@@ -1,5 +1,6 @@
 package com.example.kalongip.chatapp;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -9,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.example.kalongip.chatapp.Adapters.ConversationListAdapter;
 import com.example.kalongip.chatapp.Model.RealmFriendList;
@@ -79,7 +81,7 @@ public class ConversationListFragment extends Fragment{
         user = cache.getUser();
         Log.d(TAG, "Current user: " + user.toString());
 
-        if (searchName != null){
+        if (searchName != null && !searchName.contentEquals(user.getUsername())){
             //Call from SearchActivity
             final Firebase userRef = new Firebase(Const.FIREBASE_URL + "/users");
             Query queryRef = userRef.orderByChild("username").equalTo(searchName);
@@ -87,12 +89,19 @@ public class ConversationListFragment extends Fragment{
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     Log.d(TAG, "Query called!" + dataSnapshot);
+                    ProgressDialog progressDialog = ProgressDialog.show(getContext(), "Loading", "please wait...");
                     messages.clear();
-                    for (DataSnapshot snapshot: dataSnapshot.getChildren()){
-                        User users = snapshot.getValue(User.class);
-                        RealmMessages msg = new RealmMessages(user.getUsername(), users.getUsername(), "Click on me to chat!", true, false, date);
-                        messages.add(msg);
-                        adapter.notifyDataSetChanged();
+
+                    if (!dataSnapshot.hasChildren()){
+                        Toast.makeText(getContext(), "No matches!", Toast.LENGTH_LONG).show();
+                    }else{
+                        for (DataSnapshot snapshot: dataSnapshot.getChildren()){
+                            User users = snapshot.getValue(User.class);
+                            RealmMessages msg = new RealmMessages(user.getUsername(), users.getUsername(), "Click on me to chat!", true, false, date);
+                            progressDialog.dismiss();
+                            messages.add(msg);
+                            adapter.notifyDataSetChanged();
+                        }
                     }
                 }
 
@@ -101,7 +110,8 @@ public class ConversationListFragment extends Fragment{
 
                 }
             });
-        }
+        }else if (searchName != null && searchName.contentEquals(user.getUsername()))
+            Toast.makeText(getContext(), "It's your name!", Toast.LENGTH_LONG).show();
     }
 
     @Nullable

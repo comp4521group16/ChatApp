@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.example.kalongip.chatapp.Value.Const;
 import com.firebase.client.Firebase;
@@ -104,6 +105,7 @@ public class RegisterActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(Map<String, Object> result) {
                     Log.d(TAG, "Successfully created user account with uid: " + result.get("uid"));
+                    Toast.makeText(getApplicationContext(), "A new account was created successfully!", Toast.LENGTH_LONG);
                     Firebase userRef = myFirebaseRef.child("users").child(result.get("uid").toString());
                     userRef.child("email").setValue(email);
                     userRef.child("username").setValue(username);
@@ -117,6 +119,8 @@ public class RegisterActivity extends AppCompatActivity {
                     // there was an error
                     Log.d(TAG, "Error!");
                     progressDialog.dismiss();
+                    Toast.makeText(getApplicationContext(), "Account already exist!", Toast.LENGTH_LONG);
+                    newEmail.requestFocus();
                 }
             });
         }

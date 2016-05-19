@@ -87,25 +87,34 @@ public class ConversationListAdapter extends RecyclerView.Adapter<ConversationLi
                         friends.add(fd.getaFriend());
                     }
 
-                    //Add a new fd to realm
-                    RealmFriendList fd = new RealmFriendList(friends.size(), receiver);
-                    realm = Realm.getInstance(context);
-                    realm.beginTransaction();
-                    realm.copyToRealm(fd);
-                    realm.commitTransaction();
+                    //Check if the receiver already a friend of the user
+                    boolean isFriend = false;
+                    for (String aFriend: friends){
+                        if (receiver.contentEquals(aFriend))
+                            isFriend = true;
+                    }
+                    //Do add friend stuffs if the receiver is not a friend of user
+                    if (!isFriend){
+                        //Add a new fd to realm
+                        RealmFriendList fd = new RealmFriendList(friends.size(), receiver);
+                        realm = Realm.getInstance(context);
+                        realm.beginTransaction();
+                        realm.copyToRealm(fd);
+                        realm.commitTransaction();
 
-                    friends.add(receiver);
+                        friends.add(receiver);
 
-                    //update friendlist in sharepref
-                    Cache cache = new Cache(context);
-                    User user = cache.getUser();
-                    Log.d(TAG, "Add friend by the user:" + user.toString());
-                    user.setFriends(friends);
-                    cache.setUser(user);
+                        //update friendlist in sharepref
+                        Cache cache = new Cache(context);
+                        User user = cache.getUser();
+                        Log.d(TAG, "Add friend by the user:" + user.toString());
+                        user.setFriends(friends);
+                        cache.setUser(user);
 
-                    //update friendlist in firebase
-                    Firebase ref = new Firebase(Const.FIREBASE_URL + "/users");
-                    ref.child("/" + user.getUid()).child("friends").setValue(friends);
+                        //update friendlist in firebase
+                        Firebase ref = new Firebase(Const.FIREBASE_URL + "/users");
+                        ref.child("/" + user.getUid()).child("friends").setValue(friends);
+                    }
 
                     ((AppCompatActivity) context).finish();
                     Intent intent = new Intent(context, SocketActivity.class);
