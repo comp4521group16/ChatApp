@@ -72,7 +72,8 @@ public class SocketActivity extends AppCompatActivity implements ChatFragment.On
         Bundle extra = intent.getExtras();
         if(extra !=null){
             receiver = extra.getString("sender");
-            if(extra.getString("isPhoto").contains("true")){
+            if(extra.getString("isPhoto")!=null){
+                if(extra.getString("isPhoto").contains("true"))
                 index = Integer.parseInt(extra.getString("content"));
                 Log.i(TAG, "Index: " + index);
             }

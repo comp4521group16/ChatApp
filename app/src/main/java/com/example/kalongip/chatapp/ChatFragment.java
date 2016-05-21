@@ -73,6 +73,7 @@ public class ChatFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
     private Realm realm;
 
+    boolean syncSuccess = true;
     private ImageButton imageButton = null;
     private Socket socket;
     private Cache cache;
@@ -106,6 +107,7 @@ public class ChatFragment extends Fragment {
                     } catch (JSONException e) {
                         //return;
                     }
+                    syncSuccess = true;
                 }
             });
         }
@@ -144,6 +146,9 @@ public class ChatFragment extends Fragment {
                     joinSocket();
                     mListener.onFragmentInteraction(false);
                     enableSending();
+                    if(syncSuccess = false){
+                        retrievePendingImage();
+                    }
                 }
             });
         }
@@ -198,12 +203,13 @@ public class ChatFragment extends Fragment {
         Log.i(TAG, "onResume()");
          joinSocket();
         if(index > 0){
+            syncSuccess = false;
             retrievePendingImage();
         }
     }
 
     private void retrievePendingImage(){
-        Log.i(TAG, "joinSocket");
+        Log.i(TAG, "retrievePendingImage()");
         JSONObject username = new JSONObject();
         try {
             username.put("receiver", user.getUsername());

@@ -59,7 +59,7 @@ public class customHandler extends BroadcastReceiver
             String packageName = context.getPackageName();
             //Intent resultIntent = new Intent(context.getPackageManager().getLaunchIntentForPackage(packageName));
             Intent resultIntent = new Intent(context, SocketActivity.class);
-            resultIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            resultIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
             resultIntent.putExtra("goChatRoomDirectly", true);
             resultIntent.putExtra("receiver", PushdataOpen.get("receiver").toString());
             resultIntent.putExtras(intent.getBundleExtra("pushData"));
