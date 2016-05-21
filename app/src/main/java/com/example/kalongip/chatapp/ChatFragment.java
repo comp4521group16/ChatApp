@@ -148,7 +148,7 @@ public class ChatFragment extends Fragment {
 
     {
         try {
-            socket = IO.socket("http://192.168.1.60:3000");
+            socket = IO.socket("http://192.168.1.124:3000");
             socket.on("connect", handleRegistration);
             socket.on("connect_error", handleConnectionError);
         } catch (URISyntaxException e) {
@@ -190,7 +190,7 @@ public class ChatFragment extends Fragment {
     public void onResume() {
         super.onResume();
         Log.i(TAG, "onResume()");
-        // joinSocket();
+         joinSocket();
     }
 
     /**

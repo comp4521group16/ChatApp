@@ -1,6 +1,7 @@
 package com.example.kalongip.chatapp;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -31,6 +32,7 @@ import com.example.kalongip.chatapp.Value.Cache;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -67,7 +69,10 @@ public class SocketActivity extends AppCompatActivity implements ChatFragment.On
         goChatRoomDirectly = intent.getBooleanExtra("goChatRoomDirectly", false);
         Log.d(TAG, "receiver = " + receiver);
         Log.d(TAG, "goChatRoomDirectly = " + goChatRoomDirectly);
-
+        Bundle extra = intent.getExtras();
+        if(extra !=null){
+            receiver = extra.getString("sender");
+        }
         FrameLayout frameLayout = (FrameLayout) findViewById(R.id.fragment_container);
         if (frameLayout != null) {
             if (goChatRoomDirectly) {
