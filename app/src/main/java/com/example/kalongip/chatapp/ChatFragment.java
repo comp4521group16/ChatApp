@@ -54,8 +54,10 @@ public class ChatFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String RECEIVER = "receiver";
+    private static final String INDEX = "index";
     private static final String JOIN = "join";
     private static final String OFFLINE = "offline";
+    private static  final  String RETRIEVE = "retrievePhoto";
     // TODO: Rename and change types of parameters
     private String receiverName;
 
@@ -75,6 +77,7 @@ public class ChatFragment extends Fragment {
     private Socket socket;
     private Cache cache;
     private User user;
+    int index = -1;
 
     private Emitter.Listener handleIncomingMessages = new Emitter.Listener() {
         @Override
@@ -148,7 +151,7 @@ public class ChatFragment extends Fragment {
 
     {
         try {
-            socket = IO.socket("http://192.168.1.60:3000");
+            socket = IO.socket("http://192.168.1.124:3000");
             socket.on("connect", handleRegistration);
             socket.on("connect_error", handleConnectionError);
         } catch (URISyntaxException e) {
@@ -161,10 +164,11 @@ public class ChatFragment extends Fragment {
     }
 
     // TODO: Rename and change types and number of parameters
-    public static ChatFragment newInstance(String name) {
+    public static ChatFragment newInstance(String name, int index) {
         ChatFragment fragment = new ChatFragment();
         Bundle args = new Bundle();
         args.putString(RECEIVER, name);
+        args.putInt(INDEX, index);
         fragment.setArguments(args);
         return fragment;
     }
@@ -175,6 +179,8 @@ public class ChatFragment extends Fragment {
         setHasOptionsMenu(true);
         if (getArguments() != null) {
             receiverName = getArguments().getString(RECEIVER);
+            index = getArguments().getInt(INDEX);
+            Log.i(TAG, "Index: " + index);
         }
         Log.d(TAG, "Receiver: " + receiverName);
         socket.connect();
@@ -190,9 +196,23 @@ public class ChatFragment extends Fragment {
     public void onResume() {
         super.onResume();
         Log.i(TAG, "onResume()");
-        // joinSocket();
+         joinSocket();
+        if(index > 0){
+            retrievePendingImage();
+        }
     }
 
+    private void retrievePendingImage(){
+        Log.i(TAG, "joinSocket");
+        JSONObject username = new JSONObject();
+        try {
+            username.put("receiver", user.getUsername());
+            username.put("index", index);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        socket.emit(RETRIEVE, username);
+    }
     /**
      * This method Send the username obtained from shared preference to the socket to indicate online status
      * Called in onResume();

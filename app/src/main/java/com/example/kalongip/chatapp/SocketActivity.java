@@ -1,6 +1,7 @@
 package com.example.kalongip.chatapp;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -31,6 +32,7 @@ import com.example.kalongip.chatapp.Value.Cache;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -54,7 +56,7 @@ public class SocketActivity extends AppCompatActivity implements ChatFragment.On
     private String mCurrentPhotoPath = null;
     PopupWindow popupWindow;
     boolean notConnected = false;
-
+    int index = -1;
     private String receiver;
     private boolean goChatRoomDirectly;
 
@@ -67,11 +69,18 @@ public class SocketActivity extends AppCompatActivity implements ChatFragment.On
         goChatRoomDirectly = intent.getBooleanExtra("goChatRoomDirectly", false);
         Log.d(TAG, "receiver = " + receiver);
         Log.d(TAG, "goChatRoomDirectly = " + goChatRoomDirectly);
-
+        Bundle extra = intent.getExtras();
+        if(extra !=null){
+            receiver = extra.getString("sender");
+            if(extra.getString("isPhoto").contains("true")){
+                index = Integer.parseInt(extra.getString("content"));
+                Log.i(TAG, "Index: " + index);
+            }
+        }
         FrameLayout frameLayout = (FrameLayout) findViewById(R.id.fragment_container);
         if (frameLayout != null) {
             if (goChatRoomDirectly) {
-                ChatFragment chatFragment = ChatFragment.newInstance(receiver);
+                ChatFragment chatFragment = ChatFragment.newInstance(receiver, index);
                 getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, chatFragment, CHAT_FRAGMENT_TAG).commit();
             } else {
                 ConversationListFragment conversationListFragment = new ConversationListFragment();
@@ -181,7 +190,7 @@ public class SocketActivity extends AppCompatActivity implements ChatFragment.On
                 // Thumbnail image
                 Bitmap minibm = ThumbnailUtils.extractThumbnail(bitmap, 640, 480);
                 ChatFragment fragment = (ChatFragment) getSupportFragmentManager().findFragmentByTag(CHAT_FRAGMENT_TAG);
-                fragment.sendImage(bitmap);
+                fragment.sendImage(minibm);
 
             } catch (Exception e) {
                 e.printStackTrace();

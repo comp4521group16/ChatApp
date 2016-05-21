@@ -72,23 +72,24 @@ public class customHandler extends BroadcastReceiver
             Log.i(TAG, "User Received notification with Message: " + PushdataOpen.get("message"));
             String sender = (String) PushdataOpen.get("sender");
             String receiver = (String) PushdataOpen.get("receiver");
-            String content = (String) PushdataOpen.get("message");
+            String content = (String) PushdataOpen.get("content");
             boolean isPhoto;
             RealmMessages realmMessages = null;
             if(PushdataOpen.get("isPhoto").equals("true")){
                 isPhoto = true;
-                realmMessages = new RealmMessages(sender, receiver, content, false, isPhoto, new Date());
+               // realmMessages = new RealmMessages(sender, receiver, content, false, isPhoto, new Date());
             }else{
                 isPhoto = false;
                 realmMessages = new RealmMessages(sender, receiver, content, false, isPhoto, new Date());
+                // Add the message received to the local db
+                Realm realm = Realm.getInstance(context);
+                realm.beginTransaction();
+                realm.copyToRealm(realmMessages);
+                realm.commitTransaction();
             }
             Log.i(TAG, "CustomFields: " + sender + " " + receiver + " " + content + " " + isPhoto);
 
-            // Add the message received to the local db
-            Realm realm = Realm.getInstance(context);
-            realm.beginTransaction();
-            realm.copyToRealm(realmMessages);
-            realm.commitTransaction();
+
 
         }
     }
