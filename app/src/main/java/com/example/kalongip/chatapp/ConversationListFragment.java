@@ -105,7 +105,9 @@ public class ConversationListFragment extends Fragment{
                             adapter.notifyDataSetChanged();
                         }
                     }
-                    progressDialog.dismiss();
+                    if (progressDialog != null){
+                        progressDialog.dismiss();
+                    }
                 }
 
                 @Override
