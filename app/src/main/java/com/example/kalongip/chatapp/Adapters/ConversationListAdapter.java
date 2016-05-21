@@ -73,7 +73,7 @@ public class ConversationListAdapter extends RecyclerView.Adapter<ConversationLi
             public void onClick(View v) {
                 //TODO set OnClick
                 if (!isSearch){
-                    ChatFragment chatFragment = ChatFragment.newInstance(receiver);
+                    ChatFragment chatFragment = ChatFragment.newInstance(receiver, -1);
                     FragmentManager fm = ((AppCompatActivity) context).getSupportFragmentManager();
                     FragmentTransaction ft = fm.beginTransaction();
                     ft.replace(R.id.fragment_container, chatFragment, CHAT_FRAGMENT_TAG);

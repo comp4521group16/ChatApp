@@ -56,7 +56,7 @@ public class SocketActivity extends AppCompatActivity implements ChatFragment.On
     private String mCurrentPhotoPath = null;
     PopupWindow popupWindow;
     boolean notConnected = false;
-
+    int index = -1;
     private String receiver;
     private boolean goChatRoomDirectly;
 
@@ -72,11 +72,15 @@ public class SocketActivity extends AppCompatActivity implements ChatFragment.On
         Bundle extra = intent.getExtras();
         if(extra !=null){
             receiver = extra.getString("sender");
+            if(extra.getString("isPhoto").contains("true")){
+                index = Integer.parseInt(extra.getString("content"));
+                Log.i(TAG, "Index: " + index);
+            }
         }
         FrameLayout frameLayout = (FrameLayout) findViewById(R.id.fragment_container);
         if (frameLayout != null) {
             if (goChatRoomDirectly) {
-                ChatFragment chatFragment = ChatFragment.newInstance(receiver);
+                ChatFragment chatFragment = ChatFragment.newInstance(receiver, index);
                 getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, chatFragment, CHAT_FRAGMENT_TAG).commit();
             } else {
                 ConversationListFragment conversationListFragment = new ConversationListFragment();
