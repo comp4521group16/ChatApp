@@ -110,7 +110,6 @@ public class RegisterActivity extends AppCompatActivity {
                     userRef.child("email").setValue(email);
                     userRef.child("username").setValue(username);
                     userRef.child("uid").setValue(result.get("uid"));
-//                    friends.add("Welcome to Texter!");
                     userRef.child("friends").setValue(friends);
                     finish();
                 }

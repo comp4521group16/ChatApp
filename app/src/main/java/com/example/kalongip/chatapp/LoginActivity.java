@@ -232,7 +232,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                             //store fdlist to realm
                             List<String> friends = user.getFriends();
                             RealmQuery query = new RealmQuery(getApplicationContext());
-                            RealmResults<RealmFriendList> results= query.retrieveFriendList();
+                            RealmResults<RealmFriendList> results = query.retrieveFriendList();
                             realm.beginTransaction();
                             results.clear();
                             for (int i = 0; i < friends.size(); i++){

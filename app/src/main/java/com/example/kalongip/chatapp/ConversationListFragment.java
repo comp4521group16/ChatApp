@@ -1,6 +1,7 @@
 package com.example.kalongip.chatapp;
 
-import android.app.ProgressDialog;
+import android.content.Context;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -92,7 +93,6 @@ public class ConversationListFragment extends Fragment{
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     Log.d(TAG, "Query called!" + dataSnapshot);
-                    ProgressDialog progressDialog = ProgressDialog.show(getContext(), "Loading", "please wait...");
                     messages.clear();
 
                     if (!dataSnapshot.hasChildren()){
@@ -105,9 +105,7 @@ public class ConversationListFragment extends Fragment{
                             adapter.notifyDataSetChanged();
                         }
                     }
-                    if (progressDialog != null){
-                        progressDialog.dismiss();
-                    }
+
                 }
 
                 @Override
@@ -144,24 +142,76 @@ public class ConversationListFragment extends Fragment{
             Log.d(TAG, "Friend list called!");
             messages.clear();
             realm = Realm.getInstance(getContext());
-            RealmQuery query = new RealmQuery(getContext());
-            RealmResults<RealmFriendList> results = query.retrieveFriendList();
-            for (RealmFriendList fd: results){
-                String receiver = fd.getaFriend();
-                RealmResults<RealmMessages> realmResults = new RealmQuery(getContext()).retrieveChatHistoryByUserName(receiver);
-                if (realmResults.size() > 0){
-                    String content = realmResults.last().getContent();
-                    boolean fromMe = realmResults.last().isFromMe();
-                    boolean isPhoto = realmResults.last().isPhoto();
-                    Date date = realmResults.last().getDate();
-                    RealmMessages msg = new RealmMessages(user.getUsername(), receiver, content, fromMe, isPhoto, date);
-                    messages.add(msg);
-                }else {
-                    RealmMessages msg = new RealmMessages(user.getUsername(), receiver, "No history!", true, false, date);
-                    messages.add(msg);
+            final RealmQuery query = new RealmQuery(getContext());
+
+            //Check if connected to Internet
+            if (((ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo() != null){
+                Log.d(TAG, "from Internet!");
+                Firebase ref = new Firebase(Const.FIREBASE_URL + "/users/" + user.getUid());
+                ref.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        user = dataSnapshot.getValue(User.class);
+                        List<String> friends = user.getFriends();
+
+                        RealmResults<RealmFriendList> results = query.retrieveFriendList();
+                        realm.beginTransaction();
+                        results.clear();
+                        for (int i = 0; i < friends.size(); i++){
+                            String fd = friends.get(i);
+                            RealmFriendList friendList = new RealmFriendList(i, fd);
+                            realm.copyToRealm(friendList);
+                        }
+                        realm.commitTransaction();
+                        cache.setUser(user);
+
+                        RealmResults<RealmFriendList> newResults = query.retrieveFriendList();
+                        for (RealmFriendList fd: newResults){
+                            String receiver = fd.getaFriend();
+                            RealmResults<RealmMessages> realmResults = new RealmQuery(getContext()).retrieveChatHistoryByUserName(receiver);
+                            if (realmResults.size() > 0){
+                                String content = realmResults.last().getContent();
+                                boolean fromMe = realmResults.last().isFromMe();
+                                boolean isPhoto = realmResults.last().isPhoto();
+                                Date date = realmResults.last().getDate();
+                                RealmMessages msg = new RealmMessages(ConversationListFragment.this.user.getUsername(), receiver, content, fromMe, isPhoto, date);
+                                messages.add(msg);
+                            }else {
+                                RealmMessages msg = new RealmMessages(ConversationListFragment.this.user.getUsername(), receiver, "No history!", true, false, date);
+                                messages.add(msg);
+                            }
+                            adapter.notifyDataSetChanged();
+                        }
+
+                    }
+
+                    @Override
+                    public void onCancelled(FirebaseError firebaseError) {
+
+                    }
+                });
+            }else{
+                //No Internet connection
+                Log.d(TAG, "From local database!");
+                RealmResults<RealmFriendList> results = query.retrieveFriendList();
+                for (RealmFriendList fd: results){
+                    String receiver = fd.getaFriend();
+                    RealmResults<RealmMessages> realmResults = new RealmQuery(getContext()).retrieveChatHistoryByUserName(receiver);
+                    if (realmResults.size() > 0){
+                        String content = realmResults.last().getContent();
+                        boolean fromMe = realmResults.last().isFromMe();
+                        boolean isPhoto = realmResults.last().isPhoto();
+                        Date date = realmResults.last().getDate();
+                        RealmMessages msg = new RealmMessages(user.getUsername(), receiver, content, fromMe, isPhoto, date);
+                        messages.add(msg);
+                    }else {
+                        RealmMessages msg = new RealmMessages(user.getUsername(), receiver, "No history!", true, false, date);
+                        messages.add(msg);
+                    }
+                    adapter.notifyDataSetChanged();
                 }
-                adapter.notifyDataSetChanged();
             }
+
         }
     }
 

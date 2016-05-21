@@ -22,7 +22,11 @@ import com.example.kalongip.chatapp.RealmQuery;
 import com.example.kalongip.chatapp.SocketActivity;
 import com.example.kalongip.chatapp.Value.Cache;
 import com.example.kalongip.chatapp.Value.Const;
+import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.Query;
+import com.firebase.client.ValueEventListener;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -35,7 +39,7 @@ import io.realm.RealmResults;
 /**
  * Created by timothy on 8/4/2016.
  */
-public class ConversationListAdapter extends RecyclerView.Adapter<ConversationListAdapter.ViewHolder>{
+public class ConversationListAdapter extends RecyclerView.Adapter<ConversationListAdapter.ViewHolder> {
     private static final String TAG = ConversationListAdapter.class.getSimpleName();
 
     private List<RealmMessages> messages = new ArrayList<>(); // A List of messages passed from ConversationListFragment
@@ -59,7 +63,12 @@ public class ConversationListAdapter extends RecyclerView.Adapter<ConversationLi
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         final String receiver = messages.get(position).getReceiver();
-        String content = messages.get(position).getContent();
+        String content;
+        if (messages.get(position).isPhoto()) {
+            content = messages.get(position).getSender() + " sent an image";
+        } else {
+            content = messages.get(position).getContent();
+        }
         Date date = messages.get(position).getDate();
 
         SimpleDateFormat sdFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
@@ -72,7 +81,7 @@ public class ConversationListAdapter extends RecyclerView.Adapter<ConversationLi
             @Override
             public void onClick(View v) {
                 //TODO set OnClick
-                if (!isSearch){
+                if (!isSearch) {
                     ChatFragment chatFragment = ChatFragment.newInstance(receiver, -1);
                     FragmentManager fm = ((AppCompatActivity) context).getSupportFragmentManager();
                     FragmentTransaction ft = fm.beginTransaction();
@@ -80,21 +89,21 @@ public class ConversationListAdapter extends RecyclerView.Adapter<ConversationLi
                     ft.addToBackStack(null).commit();
                 } else {
                     //Get the current fdlist from realm
-                    List<String> friends= new ArrayList<>();
+                    List<String> friends = new ArrayList<>();
                     RealmQuery query = new RealmQuery(context);
                     RealmResults<RealmFriendList> friendList = query.retrieveFriendList();
-                    for (RealmFriendList fd: friendList) {
+                    for (RealmFriendList fd : friendList) {
                         friends.add(fd.getaFriend());
                     }
 
                     //Check if the receiver already a friend of the user
                     boolean isFriend = false;
-                    for (String aFriend: friends){
+                    for (String aFriend : friends) {
                         if (receiver.contentEquals(aFriend))
                             isFriend = true;
                     }
                     //Do add friend stuffs if the receiver is not a friend of user
-                    if (!isFriend){
+                    if (!isFriend) {
                         //Add a new fd to realm
                         RealmFriendList fd = new RealmFriendList(friends.size(), receiver);
                         realm = Realm.getInstance(context);
@@ -106,7 +115,7 @@ public class ConversationListAdapter extends RecyclerView.Adapter<ConversationLi
 
                         //update friendlist in sharepref
                         Cache cache = new Cache(context);
-                        User user = cache.getUser();
+                        final User user = cache.getUser();
                         Log.d(TAG, "Add friend by the user:" + user.toString());
                         user.setFriends(friends);
                         cache.setUser(user);
@@ -114,6 +123,34 @@ public class ConversationListAdapter extends RecyclerView.Adapter<ConversationLi
                         //update friendlist in firebase
                         Firebase ref = new Firebase(Const.FIREBASE_URL + "/users");
                         ref.child("/" + user.getUid()).child("friends").setValue(friends);
+
+                        //update target's friendlist
+                        Query queryRef = ref.orderByChild("username").equalTo(receiver);
+                        queryRef.addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                for (DataSnapshot result: dataSnapshot.getChildren()){
+                                    User target = result.getValue(User.class);
+                                    List<String> targetFdList = target.getFriends();
+
+                                    boolean isFriend = false;
+                                    for (String aFriend : targetFdList) {
+                                        if (user.getUsername().contentEquals(aFriend))
+                                            isFriend = true;
+                                    }
+                                    if(!isFriend){
+                                        targetFdList.add(user.getUsername());
+                                        Firebase targetRef = new Firebase(Const.FIREBASE_URL + "/users");
+                                        targetRef.child("/" + target.getUid()).child("friends").setValue(targetFdList);
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(FirebaseError firebaseError) {
+
+                            }
+                        });
                     }
 
                     ((AppCompatActivity) context).finish();
@@ -131,7 +168,7 @@ public class ConversationListAdapter extends RecyclerView.Adapter<ConversationLi
         return messages.size();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder{
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView receiver;
         TextView content;
         TextView date;
