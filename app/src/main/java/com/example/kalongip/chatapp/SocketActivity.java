@@ -186,7 +186,7 @@ public class SocketActivity extends AppCompatActivity implements ChatFragment.On
                 // Thumbnail image
                 Bitmap minibm = ThumbnailUtils.extractThumbnail(bitmap, 640, 480);
                 ChatFragment fragment = (ChatFragment) getSupportFragmentManager().findFragmentByTag(CHAT_FRAGMENT_TAG);
-                fragment.sendImage(bitmap);
+                fragment.sendImage(minibm);
 
             } catch (Exception e) {
                 e.printStackTrace();
