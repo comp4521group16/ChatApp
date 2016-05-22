@@ -157,6 +157,9 @@ public class SocketActivity extends AppCompatActivity implements ChatFragment.On
         } else if (id == R.id.action_search) {
             Intent intent = new Intent(getApplicationContext(), SearchActivity.class);
             startActivity(intent);
+        } else if (id == R.id.action_draw){
+            Intent intent = new Intent(getApplicationContext(), DrawActivity.class);
+            startActivity(intent);
         }
         return super.onOptionsItemSelected(item);
     }

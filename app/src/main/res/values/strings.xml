@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Texter</string>
 
@@ -23,6 +24,18 @@
     <string name="action_camera">Camera</string>
     <string name="action_gallery">Gallery</string>
     <string name="action_logout">Logout</string>
+    <string name="action_draw">Draw</string>
     <string name="sign_up">Sign up</string>
     <string name="action_search">Search..</string>
+
+    <!-- Strings related to draw -->
+    <string name="start_new">New</string>
+    <string name="brush">Brush</string>
+    <string name="erase">Erase</string>
+    <string name="save">Save</string>
+    <string name="paint">Paint</string>
+    <string name="sml">Small</string>
+    <string name="med">Medium</string>
+    <string name="lrg">Large</string>
+    <string name="title_activity_draw">DrawActivity</string>
 </resources>
