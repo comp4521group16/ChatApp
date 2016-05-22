@@ -65,7 +65,8 @@ public class ConversationListAdapter extends RecyclerView.Adapter<ConversationLi
         final String receiver = messages.get(position).getReceiver();
         String content;
         if (messages.get(position).isPhoto()) {
-            content = messages.get(position).getSender() + " sent an image";
+           // content = messages.get(position).getSender() + " sent an image";
+            content = "Photo";
         } else {
             content = messages.get(position).getContent();
         }
@@ -129,7 +130,7 @@ public class ConversationListAdapter extends RecyclerView.Adapter<ConversationLi
                         queryRef.addValueEventListener(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
-                                for (DataSnapshot result: dataSnapshot.getChildren()){
+                                for (DataSnapshot result : dataSnapshot.getChildren()) {
                                     User target = result.getValue(User.class);
                                     List<String> targetFdList = target.getFriends();
 
@@ -138,7 +139,7 @@ public class ConversationListAdapter extends RecyclerView.Adapter<ConversationLi
                                         if (user.getUsername().contentEquals(aFriend))
                                             isFriend = true;
                                     }
-                                    if(!isFriend){
+                                    if (!isFriend) {
                                         targetFdList.add(user.getUsername());
                                         Firebase targetRef = new Firebase(Const.FIREBASE_URL + "/users");
                                         targetRef.child("/" + target.getUid()).child("friends").setValue(targetFdList);

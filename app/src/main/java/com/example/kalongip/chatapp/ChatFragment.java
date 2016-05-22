@@ -430,7 +430,7 @@ public class ChatFragment extends Fragment {
         super.onCreateOptionsMenu(menu, inflater);
         menu.getItem(0).setVisible(false);
         menu.getItem(3).setVisible(false);
-        menu.getItem(4).setVisible(false);
+        menu.getItem(5).setVisible(false);
     }
 
     @Override

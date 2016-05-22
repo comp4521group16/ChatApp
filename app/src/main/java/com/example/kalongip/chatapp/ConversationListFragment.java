@@ -222,6 +222,7 @@ public class ConversationListFragment extends Fragment{
         if (getActivity() instanceof SocketActivity){
             menu.getItem(1).setVisible(false);
             menu.getItem(2).setVisible(false);
+            menu.getItem(4).setVisible(false);
         }
     }
 }

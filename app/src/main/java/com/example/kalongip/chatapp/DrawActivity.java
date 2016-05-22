@@ -220,6 +220,7 @@ public class DrawActivity extends Activity implements OnClickListener {
                         Toast savedToast = Toast.makeText(getApplicationContext(),
                                 "Drawing saved to Gallery!", Toast.LENGTH_SHORT);
                         savedToast.show();
+                        finish();
                     }
                     else{
                         Toast unsavedToast = Toast.makeText(getApplicationContext(),
