@@ -70,12 +70,15 @@ public class SocketActivity extends AppCompatActivity implements ChatFragment.On
         Log.d(TAG, "receiver = " + receiver);
         Log.d(TAG, "goChatRoomDirectly = " + goChatRoomDirectly);
         Bundle extra = intent.getExtras();
-        if(extra !=null){
-            receiver = extra.getString("sender");
-            if(extra.getString("isPhoto")!=null){
-                if(extra.getString("isPhoto").contains("true"))
-                index = Integer.parseInt(extra.getString("content"));
-                Log.i(TAG, "Index: " + index);
+        if(extra != null){
+            if(extra.getString("sender") !=null){
+                receiver = extra.getString("sender");
+                Log.i(TAG, "receiver in if statement = " + receiver);
+                if(extra.getString("isPhoto")!=null){
+                    if(extra.getString("isPhoto").contains("true"))
+                        index = Integer.parseInt(extra.getString("content"));
+                    Log.i(TAG, "Index: " + index);
+                }
             }
         }
         FrameLayout frameLayout = (FrameLayout) findViewById(R.id.fragment_container);
